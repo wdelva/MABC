@@ -43,9 +43,6 @@
 #'
 #' @import mice
 #' @importFrom gsubfn strapplyc
-#' @importFrom data.table setDT
-#' @importFrom data.table setnames
-#' @importFrom readcsvcolumns read.csv.columns
 #' @importFrom randtoolbox sobol
 #' @importFrom pcaPP l1median
 #' @importFrom glmnet cv.glmnet
