@@ -179,6 +179,9 @@ MaC.weighted <- function(targets.empirical = dummy.targets.empirical,
     # 5.c. Record n.close.target
     calibration.list$n.close.to.targets[[wave]] <- n.close.to.targets
 
+    # 5.d Target features
+    calibration.list$targets.empirical[[wave]] <- targets.empirical
+
     # 6. Record selected experiments to give to mice for this wave
     calibration.list$selected.experiments[[wave]] <- sim.results.with.design.df.selected
 
