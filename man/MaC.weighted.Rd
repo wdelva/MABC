@@ -5,10 +5,11 @@
 \title{MICE-assisted calibration with weights}
 \usage{
 MaC.weighted(targets.empirical = dummy.targets.empirical,
-  RMSD.tol.max = 2, min.givetomice = 64, n.experiments = 256, lls,
-  uls, model = VEME.wrapper, strict.positive.params, probability.params,
-  inside_prior = TRUE, method = "norm", predictorMatrix = "complete",
-  maxit = 50, maxwaves = 4, n_cluster = n_cluster)
+  RMSD.tol.max = 2, min.givetomice = 64, n.experiments = 256,
+  start.experiments = 0, lls, uls, model = VEME.wrapper,
+  strict.positive.params, probability.params, inside_prior = TRUE,
+  method = "norm", predictorMatrix = "complete", maxit = 50,
+  maxwaves = 4, n_cluster = n_cluster)
 }
 \arguments{
 \item{targets.empirical}{The vector of target features}
@@ -21,6 +22,10 @@ to which MICE is applied}
 
 \item{n.experiments}{Number of parameter combinations in each wave of model
 runs}
+
+\item{start.experiments}{Matrix of experiments (possibly output from a
+previous calibration). Set to 0, start experiments will be drawn uniformly
+from the prior distributions.}
 
 \item{lls}{Vector of lower limits of the prior distribution of input
 parameter values}

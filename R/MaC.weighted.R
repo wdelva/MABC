@@ -14,7 +14,10 @@
 #' @param min.givetomice Minimal number of observations in the training dataset
 #'   to which MICE is applied
 #' @param n.experiments Number of parameter combinations in each wave of model
-#'   runs
+#' runs
+#' @param start.experiments Matrix of experiments (possibly output from a
+#'   previous calibration). Set to 0, start experiments will be drawn uniformly
+#'   from the prior distributions.
 #' @param lls Vector of lower limits of the prior distribution of input
 #'   parameter values
 #' @param uls Vector of upper limits of the prior distribution of input
@@ -53,6 +56,7 @@ MaC.weighted <- function(targets.empirical = dummy.targets.empirical,
                 RMSD.tol.max = 2,
                 min.givetomice = 64,
                 n.experiments = 256,
+                start.experiments = 0,
                 lls,
                 uls,
                 model = VEME.wrapper, # simpact.wrapper,
@@ -95,12 +99,17 @@ MaC.weighted <- function(targets.empirical = dummy.targets.empirical,
     print(c("wave", wave), quote = FALSE)
 
     if (wave == 1){
-      # 2. Initial, naive results, based on Sobol sequences
-      range.width <- uls - lls
-      ll.mat <- matrix(rep(lls, n.experiments), nrow = n.experiments, byrow = TRUE)
-      range.width.mat <- matrix(rep(range.width, n.experiments), nrow = n.experiments, byrow = TRUE)
-      sobol.seq.0.1 <- sobol(n = n.experiments, dim = length(lls), init = TRUE, scrambling = 1, seed = 1, normal = FALSE)
-      experiments <- ll.mat + sobol.seq.0.1 * range.width.mat
+      if (start.experiments == 0) {
+        # 2. Initial, naive results, based on Sobol sequences
+        range.width <- uls - lls
+        ll.mat <- matrix(rep(lls, n.experiments), nrow = n.experiments, byrow = TRUE)
+        range.width.mat <- matrix(rep(range.width, n.experiments), nrow = n.experiments, byrow = TRUE)
+        sobol.seq.0.1 <- sobol(n = n.experiments, dim = length(lls), init = TRUE, scrambling = 1, seed = 1, normal = FALSE)
+        experiments <- ll.mat + sobol.seq.0.1 * range.width.mat
+      } else {
+        experiments <- start.experiments
+      }
+
     }
 
     sim.results.simple <- simpact.parallel(model = model,
