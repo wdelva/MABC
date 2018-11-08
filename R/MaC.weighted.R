@@ -99,7 +99,7 @@ MaC.weighted <- function(targets.empirical = dummy.targets.empirical,
     print(c("wave", wave), quote = FALSE)
 
     if (wave == 1){
-      if (start.experiments == 0) {
+      if (identical(start.experiments, 0)) {
         # 2. Initial, naive results, based on Sobol sequences
         range.width <- uls - lls
         ll.mat <- matrix(rep(lls, n.experiments), nrow = n.experiments, byrow = TRUE)
