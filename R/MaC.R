@@ -45,6 +45,7 @@
 #' @importFrom glmnet cv.glmnet
 #' @importFrom gtools smartbind
 #' @import tidyverse
+#' @import dplyr
 #' @export
 
 MaC <- function(targets.empirical = dummy.targets.empirical,

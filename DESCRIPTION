@@ -11,6 +11,7 @@ LazyData: true
 Imports:
     mice (>= 3.3.0),
     tidyverse,
+    dplyr,
     glmnet,
     gsubfn,
     mvtnorm,
