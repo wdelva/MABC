@@ -15,5 +15,6 @@ Imports:
     gsubfn,
     mvtnorm,
     pcaPP,
+    parallel,
     randtoolbox
 RoxygenNote: 6.1.0
