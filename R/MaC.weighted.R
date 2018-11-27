@@ -114,7 +114,7 @@ MaC.weighted <- function(targets.empirical = dummy.targets.empirical,
 
     }
 
-    sim.results.simple <- simpact.parallel(model = model,
+    sim.results.simple <- model.parallel.run(model = model,
                                            actual.input.matrix = experiments,
                                            seed_count = 0,
                                            n_cluster = n_cluster)

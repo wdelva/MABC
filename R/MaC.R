@@ -100,7 +100,7 @@ MaC <- function(targets.empirical = dummy.targets.empirical,
       experiments <- ll.mat + sobol.seq.0.1 * range.width.mat
     }
 
-    sim.results.simple <- simpact.parallel(model = model,
+    sim.results.simple <- model.parallel.run(model = model,
                                            actual.input.matrix = experiments,
                                            seed_count = 0,
                                            n_cluster = n_cluster)
