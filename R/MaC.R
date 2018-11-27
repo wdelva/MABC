@@ -43,6 +43,8 @@
 #' @importFrom randtoolbox sobol
 #' @importFrom pcaPP l1median
 #' @importFrom glmnet cv.glmnet
+#' @importFrom gtools smartbind
+#' @import tidyverse
 #' @export
 
 MaC <- function(targets.empirical = dummy.targets.empirical,

@@ -50,6 +50,8 @@
 #' @importFrom pcaPP l1median
 #' @importFrom glmnet cv.glmnet
 #' @importFrom mvtnorm dmvnorm
+#' @importFrom gtools smartbind
+#' @import tidyverse
 #' @export
 
 MaC.weighted <- function(targets.empirical = dummy.targets.empirical,
