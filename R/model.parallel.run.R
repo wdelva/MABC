@@ -11,7 +11,6 @@
 #' @importFrom parallel makeCluster
 #' @importFrom parallel stopCluster
 #' @importFrom parallel parLapplyLB
-#' @importFrom magrittr %>%
 #' @export
 
 model.parallel.run <- function(model,
