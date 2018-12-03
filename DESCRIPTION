@@ -12,10 +12,14 @@ Imports:
     mice (>= 3.3.0),
     tidyverse,
     dplyr,
+    gtools,
     glmnet,
     gsubfn,
     mvtnorm,
     pcaPP,
     parallel,
     randtoolbox
+Depends: R (>= 3.5.0)
 RoxygenNote: 6.1.0
+Suggests: 
+    testthat
