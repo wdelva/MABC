@@ -6,6 +6,7 @@
 #' @param m number of imputations
 #' @param method string (vector)
 #' @param predictorMatrix predictorMatrix
+#' @param where where
 #' @param blocks blocks
 #' @param visitSequence defaults is 1 to ncol(data)
 #' @param formulas formulas
@@ -16,6 +17,7 @@
 #' @param printFlag Do you want stuff printed
 #' @param seed seed value to make it reproducible
 #' @param data.init Same
+#' @param ... ...
 #' @return A list with imputations and their attributes, including their inverse probability weights
 #'
 #' @import mice

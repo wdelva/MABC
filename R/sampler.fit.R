@@ -15,14 +15,14 @@
 #' @param post post
 #' @param fromto fromto
 #' @param printFlag Want a flag
+#' @param ... ...
 #' @return A list with imputations and their attributes, including their inverse probability weights
 #'
 #' @import mice
 #' @export
 
 sampler.fit <- function(data, m, where, imp, blocks, method, visitSequence,
-          predictorMatrix, formulas, blots, post, fromto, printFlag,
-          ...)
+          predictorMatrix, formulas, blots, post, fromto, printFlag, ...)
 {
   initialize.chain <- mice:::initialize.chain
   handles.format <- mice:::handles.format

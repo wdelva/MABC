@@ -6,6 +6,7 @@
 #' @param ry ry
 #' @param x x
 #' @param wy wy
+#' @param ... ...
 #' @return A list with imputations and their attributes, including their inverse probability weights
 #'
 #' @import mice

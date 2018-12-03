@@ -33,6 +33,8 @@ sampler.fit(data, m, where, imp, blocks, method, visitSequence,
 \item{fromto}{fromto}
 
 \item{printFlag}{Want a flag}
+
+\item{...}{...}
 }
 \value{
 A list with imputations and their attributes, including their inverse probability weights

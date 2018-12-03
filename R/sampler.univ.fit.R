@@ -11,6 +11,8 @@
 #' @param yname yname
 #' @param k k
 #' @param calltype calltype
+#' @param user user
+#' @param ... ...
 #' @return A list with imputations and their attributes, including their inverse probability weights
 #'
 #' @import mice

@@ -14,6 +14,8 @@ mice.impute.norm.fit(y, ry, x, wy = NULL, ...)
 \item{x}{x}
 
 \item{wy}{wy}
+
+\item{...}{...}
 }
 \value{
 A list with imputations and their attributes, including their inverse probability weights

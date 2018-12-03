@@ -18,6 +18,8 @@ mice.fit(data, m = 5, method = "norm", predictorMatrix, where = NULL,
 
 \item{predictorMatrix}{predictorMatrix}
 
+\item{where}{where}
+
 \item{blocks}{blocks}
 
 \item{visitSequence}{defaults is 1 to ncol(data)}
@@ -37,6 +39,8 @@ mice.fit(data, m = 5, method = "norm", predictorMatrix, where = NULL,
 \item{seed}{seed value to make it reproducible}
 
 \item{data.init}{Same}
+
+\item{...}{...}
 }
 \value{
 A list with imputations and their attributes, including their inverse probability weights

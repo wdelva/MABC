@@ -25,6 +25,10 @@ sampler.univ.fit(data, r, where, type, formula, method, yname, k,
 \item{k}{k}
 
 \item{calltype}{calltype}
+
+\item{user}{user}
+
+\item{...}{...}
 }
 \value{
 A list with imputations and their attributes, including their inverse probability weights
