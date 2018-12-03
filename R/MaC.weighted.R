@@ -50,7 +50,6 @@
 #' @importFrom pcaPP l1median
 #' @importFrom glmnet cv.glmnet
 #' @importFrom mvtnorm dmvnorm
-#' @importFrom gtools smartbind
 #' @import dplyr
 #' @import tidyverse
 #' @export
