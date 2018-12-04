@@ -49,7 +49,9 @@ functions used by the above two functions.
 
 ### Required software
 
-  R version >= 3.4.4
+  Open MPI or Microsoft MPI Redistributable Package, and Rmpi. For installation instructions, see <http://fisher.stats.uwo.ca/faculty/yu/Rmpi/>.
+  
+  R version >= 3.5.0
   
   In addition, a long list of auxiliary R packages is required to run the
   functions in this package.
