@@ -17,7 +17,6 @@ model.mpi.run <- function(model,
                           actual.input.matrix,
                           seed_count = 0,
                           slaves = 3){
-  mpi.comm.set.errhandler(comm = 1)
   cl <- startMPIcluster(count = slaves)
   registerDoMPI(cl)
 
