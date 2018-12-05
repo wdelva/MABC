@@ -34,7 +34,7 @@
 #' @param maxit The maxit argument used in MICE (number of times that the
 #'   chained equations are cycled through)
 #' @param maxwaves The maximum number of waves of model runs
-#' @param n_cluster The number of cores available for parallel model runs
+#' @param n_cores The number of cores available for parallel model runs
 #' @return A list with multiple waves of proposed input parameter values to
 #'   match a vector of target features.
 #'
@@ -60,7 +60,7 @@ MaC <- function(targets.empirical = dummy.targets.empirical,
                 predictorMatrix = "complete",
                 maxit = 50,
                 maxwaves = 4,
-                n_cluster = n_cluster){
+                n_cores = n_cores){
   # 0. Start the clock
   ptm <- proc.time()
   calibration.list <- list() # initiating the list where all the output of MiceABC will be stored
@@ -103,7 +103,7 @@ MaC <- function(targets.empirical = dummy.targets.empirical,
     sim.results.simple <- model.parallel.run(model = model,
                                            actual.input.matrix = experiments,
                                            seed_count = 0,
-                                           n_cluster = n_cluster)
+                                           n_cores = n_cores)
 
     new.sim.results.with.design.df <- as.data.frame(cbind(experiments,
                                                           sim.results.simple,

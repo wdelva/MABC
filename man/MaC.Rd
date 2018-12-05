@@ -8,7 +8,7 @@ MaC(targets.empirical = dummy.targets.empirical, RMSD.tol.max = 2,
   min.givetomice = 64, n.experiments = 256, lls, uls,
   model = VEME.wrapper, strict.positive.params, probability.params,
   method = "norm", predictorMatrix = "complete", maxit = 50,
-  maxwaves = 4, n_cluster = n_cluster)
+  maxwaves = 4, n_cores = n_cores)
 }
 \arguments{
 \item{targets.empirical}{The vector of target features}
@@ -50,7 +50,7 @@ chained equations are cycled through)}
 
 \item{maxwaves}{The maximum number of waves of model runs}
 
-\item{n_cluster}{The number of cores available for parallel model runs}
+\item{n_cores}{The number of cores available for parallel model runs}
 }
 \value{
 A list with multiple waves of proposed input parameter values to
