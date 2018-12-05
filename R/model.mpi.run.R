@@ -8,27 +8,24 @@
 #' @param n_cores Number of slave workers available for parallel running of the model
 #' @return a matrix of model features and the seed of the random number
 #'   generator
-#' @import doMPI
-#' @import foreach
-#' @import Rmpi
 #' @export
 
 model.mpi.run <- function(model,
                           actual.input.matrix,
                           seed_count = 0,
                           n_cores = 3){
-  cl <- startMPIcluster(count = n_cores)
-  registerDoMPI(cl)
+  cl <- doMPI::startMPIcluster(count = n_cores)
+  doMPI::registerDoMPI(cl)
 
   nb_simul <- nrow(actual.input.matrix)
 
-  modelfeatures <- foreach(irun = 1:nb_simul,
+  modelfeatures <- foreach::foreach(irun = 1:nb_simul,
                            .inorder=TRUE,
                            .combine="rbind") %dopar% {
                              seed <- seed_count + irun
                              model(c(seed, actual.input.matrix[irun, ]))
                            }
-  closeCluster(cl)
+  doMPI::closeCluster(cl)
 
   modelfeatures.array <- as.array(cbind(modelfeatures,
                                         seed_count + 1:nb_simul))

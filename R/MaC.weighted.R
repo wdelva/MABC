@@ -114,10 +114,19 @@ MaC.weighted <- function(targets.empirical = dummy.targets.empirical,
 
     }
 
-    sim.results.simple <- model.parallel.run(model = model,
-                                           actual.input.matrix = experiments,
-                                           seed_count = 0,
-                                           n_cores = n_cores)
+    if ((requireNamespace("Rmpi", quietly = TRUE)) &&
+        (requireNamespace("doMPI", quietly = TRUE)) &&
+        (requireNamespace("foreach", quietly = TRUE))){
+      sim.results.simple <- model.mpi.run(model = model,
+                                          actual.input.matrix = experiments,
+                                          seed_count = 0,
+                                          n_cores = n_cores)
+    } else {
+      sim.results.simple <- model.parallel.run(model = model,
+                                               actual.input.matrix = experiments,
+                                               seed_count = 0,
+                                               n_cores = n_cores)
+    }
 
     new.sim.results.with.design.df <- as.data.frame(cbind(experiments,
                                                           sim.results.simple,
