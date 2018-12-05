@@ -8,7 +8,7 @@ test_that("model.parallel.run works", {
                                                                       nrow = 4,
                                                                       byrow =  TRUE),
                                          seed_count = 0,
-                                         n_cluster = 2),
+                                         n_cores = 2),
                       file = "/tmp/test.model.parallel.run",
                       update = TRUE,
                       print = TRUE)
