@@ -18,11 +18,11 @@ Imports:
     mvtnorm,
     pcaPP,
     parallel,
-    randtoolbox
+    randtoolbox,
+    foreach
 Depends: R (>= 3.5.0)
 RoxygenNote: 6.1.0
 Suggests: 
     testthat,
     Rmpi,
-    doMPI,
-    foreach
+    doMPI

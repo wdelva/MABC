@@ -115,8 +115,7 @@ MaC.weighted <- function(targets.empirical = dummy.targets.empirical,
     }
 
     if ((requireNamespace("Rmpi", quietly = TRUE)) &&
-        (requireNamespace("doMPI", quietly = TRUE)) &&
-        (requireNamespace("foreach", quietly = TRUE))){
+        (requireNamespace("doMPI", quietly = TRUE))){
       sim.results.simple <- model.mpi.run(model = model,
                                           actual.input.matrix = experiments,
                                           seed_count = 0,
