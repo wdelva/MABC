@@ -9,6 +9,8 @@
 #' @return a matrix of model features and the seed of the random number
 #'   generator
 #' @import foreach
+#' @import snow
+#' @import doSNOW
 #' @export
 
 model.snow.run <- function(model,

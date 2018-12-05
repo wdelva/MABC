@@ -40,7 +40,11 @@
 #' @param maxit The maxit argument used in MICE (number of times that the
 #'   chained equations are cycled through)
 #' @param maxwaves The maximum number of waves of model runs
-#' @param n_cores The number of cores available for parallel model runs
+#' @param n_cores The number of cores available for parallel model runs. Default = 1, i.e. serial execution of model runs
+#' @param multinode TRUE or FALSE (Default). If TRUE, model runs are distributed
+#'   over the cores of multiple nodes, using DOsnow and snow as the back-end to
+#'   the foreach package. If FALSE and n_cores > 1, model runs are distributed
+#'   over the cores of a single node, using the parallel package.
 #' @return A list with multiple waves of proposed input parameter values to
 #'   match a vector of target features.
 #'
@@ -69,7 +73,8 @@ MaC.weighted <- function(targets.empirical = dummy.targets.empirical,
                 predictorMatrix = "complete",
                 maxit = 50,
                 maxwaves = 4,
-                n_cores = n_cores){
+                n_cores = n_cores,
+                multinode = FALSE){
   # 0. Start the clock
   ptm <- proc.time()
   calibration.list <- list() # initiating the list where all the output of MiceABC will be stored
@@ -114,9 +119,8 @@ MaC.weighted <- function(targets.empirical = dummy.targets.empirical,
 
     }
 
-    if ((requireNamespace("Rmpi", quietly = TRUE)) &&
-        (requireNamespace("doMPI", quietly = TRUE))){
-      sim.results.simple <- model.mpi.run(model = model,
+    if (multinode == TRUE){
+      sim.results.simple <- model.snow.run(model = model,
                                           actual.input.matrix = experiments,
                                           seed_count = 0,
                                           n_cores = n_cores)

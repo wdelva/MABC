@@ -19,11 +19,12 @@ Imports:
     pcaPP,
     parallel,
     randtoolbox,
-    foreach
+    foreach,
+    doSNOW,
+    snow
 Depends: R (>= 3.5.0)
 RoxygenNote: 6.1.0
 Suggests: 
     testthat,
     Rmpi,
-    doMPI,
-    doSNOW
+    doMPI
