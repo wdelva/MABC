@@ -5,7 +5,7 @@
 #' @param model Wrapper function for the model
 #' @param actual.input.matrix Matrix with parameter combinations to be run
 #' @param seed_count Origin of random number seed
-#' @param n_cluster Number of cores available for parallel running of the model
+#' @param n_cores Number of cores available for parallel running of the model
 #' @return a matrix of model features and the seed of the random number
 #'   generator
 #' @importFrom parallel makeCluster
@@ -16,8 +16,8 @@
 model.parallel.run <- function(model,
                              actual.input.matrix,
                              seed_count = 0,
-                             n_cluster = 4){
-  cl <- makeCluster(getOption("cl.cores", n_cluster))
+                             n_cores = 1){
+  cl <- makeCluster(getOption("cl.cores", n_cores))
   tab_simul_summarystat = NULL
   list_param <- list(NULL)
 

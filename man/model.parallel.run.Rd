@@ -5,7 +5,7 @@
 \title{Distribute model runs over multiple cores}
 \usage{
 model.parallel.run(model, actual.input.matrix, seed_count = 0,
-  n_cluster = 4)
+  n_cores = 1)
 }
 \arguments{
 \item{model}{Wrapper function for the model}
@@ -14,7 +14,7 @@ model.parallel.run(model, actual.input.matrix, seed_count = 0,
 
 \item{seed_count}{Origin of random number seed}
 
-\item{n_cluster}{Number of cores available for parallel running of the model}
+\item{n_cores}{Number of cores available for parallel running of the model}
 }
 \value{
 a matrix of model features and the seed of the random number

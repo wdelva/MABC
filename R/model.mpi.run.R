@@ -5,7 +5,7 @@
 #' @param model Wrapper function for the model
 #' @param actual.input.matrix Matrix with parameter combinations to be run
 #' @param seed_count Origin of random number seed
-#' @param slaves Number of slave workers available for parallel running of the model
+#' @param n_cores Number of slave workers available for parallel running of the model
 #' @return a matrix of model features and the seed of the random number
 #'   generator
 #' @import doMPI
@@ -16,8 +16,8 @@
 model.mpi.run <- function(model,
                           actual.input.matrix,
                           seed_count = 0,
-                          slaves = 3){
-  cl <- startMPIcluster(count = slaves)
+                          n_cores = 3){
+  cl <- startMPIcluster(count = n_cores)
   registerDoMPI(cl)
 
   nb_simul <- nrow(actual.input.matrix)

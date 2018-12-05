@@ -4,7 +4,7 @@
 \alias{model.mpi.run}
 \title{Distribute model runs over multiple nodes}
 \usage{
-model.mpi.run(model, actual.input.matrix, seed_count = 0, slaves = 3)
+model.mpi.run(model, actual.input.matrix, seed_count = 0, n_cores = 3)
 }
 \arguments{
 \item{model}{Wrapper function for the model}
@@ -13,7 +13,7 @@ model.mpi.run(model, actual.input.matrix, seed_count = 0, slaves = 3)
 
 \item{seed_count}{Origin of random number seed}
 
-\item{slaves}{Number of slave workers available for parallel running of the model}
+\item{n_cores}{Number of slave workers available for parallel running of the model}
 }
 \value{
 a matrix of model features and the seed of the random number
