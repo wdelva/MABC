@@ -29,27 +29,29 @@ mice.fit <- function(data, m = 5, method = "norm", predictorMatrix, where = NULL
           printFlag = TRUE, seed = NA, data.init = NULL, ...)
 {
   mice.impute.norm <- mice::mice.impute.norm
-  check.dataform <- mice:::check.dataform
-  check.m <- mice:::check.m
-  make.blocks <- mice:::make.blocks
-  check.blocks <- mice:::check.blocks
-  make.predictorMatrix <- mice:::make.predictorMatrix
-  check.predictorMatrix <- mice:::check.predictorMatrix
-  check.formulas <- mice:::check.formulas
-  make.formulas <- mice:::make.formulas
-  construct.blocks <- mice:::construct.blocks
-  check.cluster <- mice:::check.cluster
-  check.where <- mice:::check.where
-  check.visitSequence <- mice:::check.visitSequence
-  check.method <- mice:::check.method
-  check.post <- mice:::check.post
-  check.blots <- mice:::check.blots
-  edit.setup <- mice:::edit.setup
-  initialize.imp <- mice:::initialize.imp
-  check.data <- mice:::check.data
-  is.passive <- mice:::is.passive
-  check.df <- mice:::check.df
-  remove.lindep <- mice:::remove.lindep
+  make.blocks <- mice::make.blocks
+  make.predictorMatrix <- mice::make.predictorMatrix
+  make.formulas <- mice::make.formulas
+  construct.blocks <- mice::construct.blocks
+
+
+  #c#heck.dataform <- mice:::c#heck.dataform
+  #c#heck.m <- mice:::c#heck.m
+  #c#heck.blocks <- mice:::c#heck.blocks
+  #c#heck.predictorMatrix <- mice:::c#heck.predictorMatrix
+  #c#heck.formulas <- mice:::c#heck.formulas
+  #c#heck.cluster <- mice:::c#heck.cluster
+  #c#heck.where <- mice:::c#heck.where
+  #c#heck.visitSequence <- mice:::c#heck.visitSequence
+  #c#heck.method <- mice:::c#heck.method
+  #c#heck.post <- mice:::c#heck.post
+  #c#heck.blots <- mice:::c#heck.blots
+  #e#dit.setup <- mice:::e#dit.setup
+  #i#nitialize.imp <- mice:::i#nitialize.imp
+  #c#heck.data <- mice:::c#heck.data
+  #is.p#assive <- mice:::is.p#assive
+  #c#heck.df <- mice:::c#heck.df
+  #r#emove.lindep <- mice:::r#emove.lindep
 
   call <- match.call()
   if (!is.na(seed))

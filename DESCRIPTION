@@ -4,11 +4,17 @@ Title: Approximate Bayesian Computation with MICE
 Version: 0.1.0
 Author: Wim Delva
 Maintainer: Wim Delva <DELVAW@sun.ac.za>
-Description: MABC is an R package for calibrating stochastic simulation models to data. It implements a sequential Approximate Bayesian Computation method that employs MICE (Multivariate Imputation by Chained Equations) as an emulator to link model inputs to model outputs.
-License: GPL-3
+Description:
+  MABC is an R package for calibrating stochastic simulation models to data. It
+  implements a sequential Approximate Bayesian Computation method that employs
+  MICE (Multivariate Imputation by Chained Equations) as an emulator to
+  link model inputs to model outputs.
+License: file LICENSE
 Encoding: UTF-8
 LazyData: true
 Imports:
+    stats,
+    utils,
     mice (>= 3.3.0),
     tidyverse,
     dplyr,

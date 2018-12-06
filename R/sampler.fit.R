@@ -24,12 +24,12 @@
 sampler.fit <- function(data, m, where, imp, blocks, method, visitSequence,
           predictorMatrix, formulas, blots, post, fromto, printFlag, ...)
 {
-  initialize.chain <- mice:::initialize.chain
-  handles.format <- mice:::handles.format
-  is.passive <- mice:::is.passive
-  sampler.univ <- mice:::sampler.univ
-  check.df <- mice:::check.df
-  remove.lindep <- mice:::remove.lindep
+  #i#nitialize.chain <- mice:::i#nitialize.chain
+  #h#andles.format <- mice:::h#andles.format
+  #i#s.passive <- mice:::i#s.passive
+  #s#ampler.univ <- mice:::s#ampler.univ
+  #c#heck.df <- mice:::c#heck.df
+  #r#emove.lindep <- mice:::r#emove.lindep
 
   imp.fit <- imp # making a copy of imp, to store parameters of fitted regression model
   imp.rnorm.values <- imp

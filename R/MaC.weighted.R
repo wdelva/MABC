@@ -9,6 +9,8 @@
 #' compared against the target features.
 #'
 #' @param targets.empirical The vector of target features
+#' @param model Wrapper function for the simulation model. See details for a
+#'   description of the required format.
 #' @param RMSD.tol.max Tolerance for the root mean squared distance between
 #'   target features and model output features
 #' @param min.givetomice Minimal number of observations in the training dataset
@@ -22,8 +24,6 @@
 #'   parameter values
 #' @param uls Vector of upper limits of the prior distribution of input
 #'   parameter values
-#' @param model Wrapper function for the simulation model. See details for a
-#'   description of the required format.
 #' @param strict.positive.params Vector of indices that indicate which of the
 #'   input parameters are strictly positive. Set to zero if there are no such
 #'   parameters.
@@ -58,14 +58,14 @@
 #' @import tidyverse
 #' @export
 
-MaC.weighted <- function(targets.empirical = dummy.targets.empirical,
+MaC.weighted <- function(targets.empirical,
+                         model,
                 RMSD.tol.max = 2,
                 min.givetomice = 64,
                 n.experiments = 256,
                 start.experiments = 0,
                 lls,
                 uls,
-                model = VEME.wrapper, # simpact.wrapper,
                 strict.positive.params,
                 probability.params,
                 inside_prior = TRUE,
@@ -85,7 +85,7 @@ MaC.weighted <- function(targets.empirical = dummy.targets.empirical,
   #final.intermediate.features <- NULL
 
   modelstring <- unlist(paste0(deparse(model), collapse = " "))
-  input.vector.length <- max(unique(na.omit(as.numeric(gsubfn::strapplyc(modelstring, "[[](\\d+)[]]", simplify = TRUE))))) - 1 # minus one because the first input parameter is the random seed
+  input.vector.length <- max(unique(stats::na.omit(as.numeric(gsubfn::strapplyc(modelstring, "[[](\\d+)[]]", simplify = TRUE))))) - 1 # minus one because the first input parameter is the random seed
 
 
   # input.vector.length <- max(unique(na.omit(as.numeric(unlist(strsplit(unlist(paste0(deparse(model), collapse = " ")), "[^0-9]+"))))))
@@ -177,7 +177,7 @@ MaC.weighted <- function(targets.empirical = dummy.targets.empirical,
       n.close.to.targets <- sum(RMSD <= RMSD.tol, na.rm = TRUE)
       #n.close.to.targets.mat[(1+steps.intermediate.targets), (1+steps.RMSD.tol)] <- n.close.to.targets
       #large.enough.training.df <- n.close.to.targets >= min.givetomice
-      RMSD.tol <- RMSD.tol + 0.00001  # Increasing RMSD.tol
+      RMSD.tol <- RMSD.tol + 0.01  # Increasing RMSD.tol
     }
     sim.results.with.design.df$RMSD <- RMSD
     final.intermediate.features <- targets.empirical

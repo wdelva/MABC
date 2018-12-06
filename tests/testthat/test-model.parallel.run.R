@@ -1,5 +1,4 @@
 context("Model parallel run")
-#library(MABC)
 
 test_that("model.parallel.run works", {
   expect_known_output(model.parallel.run(model = helper.sir,

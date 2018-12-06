@@ -21,13 +21,13 @@
 sampler.univ.fit <- function(data, r, where, type, formula, method, yname, k, calltype = "type",
           user, ...)
 {
-  obtain.design <- mice:::obtain.design
-  initialize.chain <- mice:::initialize.chain
-  handles.format <- mice:::handles.format
-  is.passive <- mice:::is.passive
-  sampler.univ <- mice:::sampler.univ
-  check.df <- mice:::check.df
-  remove.lindep <- mice:::remove.lindep
+  #o#btain.design <- mice:::o#btain.design
+  #i#nitialize.chain <- mice:::i#nitialize.chain
+  #h#andles.format <- mice:::ha#ndles.format
+  #i#s.passive <- mice:::i#s.passive
+  #s#ampler.univ <- mice:::s#ampler.univ
+  #c#heck.df <- mice:::c#heck.df
+  #r#emove.lindep <- mice:::r#emove.lindep
 
 
   j <- yname[1L]

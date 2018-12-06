@@ -4,15 +4,17 @@
 \alias{MaC.weighted}
 \title{MICE-assisted calibration with weights}
 \usage{
-MaC.weighted(targets.empirical = dummy.targets.empirical,
-  RMSD.tol.max = 2, min.givetomice = 64, n.experiments = 256,
-  start.experiments = 0, lls, uls, model = VEME.wrapper,
-  strict.positive.params, probability.params, inside_prior = TRUE,
-  method = "norm", predictorMatrix = "complete", maxit = 50,
-  maxwaves = 4, n_cores = n_cores, multinode = FALSE)
+MaC.weighted(targets.empirical, model, RMSD.tol.max = 2,
+  min.givetomice = 64, n.experiments = 256, start.experiments = 0,
+  lls, uls, strict.positive.params, probability.params,
+  inside_prior = TRUE, method = "norm", predictorMatrix = "complete",
+  maxit = 50, maxwaves = 4, n_cores = n_cores, multinode = FALSE)
 }
 \arguments{
 \item{targets.empirical}{The vector of target features}
+
+\item{model}{Wrapper function for the simulation model. See details for a
+description of the required format.}
 
 \item{RMSD.tol.max}{Tolerance for the root mean squared distance between
 target features and model output features}
@@ -32,9 +34,6 @@ parameter values}
 
 \item{uls}{Vector of upper limits of the prior distribution of input
 parameter values}
-
-\item{model}{Wrapper function for the simulation model. See details for a
-description of the required format.}
 
 \item{strict.positive.params}{Vector of indices that indicate which of the
 input parameters are strictly positive. Set to zero if there are no such
