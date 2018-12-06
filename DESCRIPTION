@@ -26,5 +26,6 @@ Depends: R (>= 3.4.0)
 RoxygenNote: 6.1.0
 Suggests: 
     testthat,
+    SimInf,
     Rmpi,
     doMPI
