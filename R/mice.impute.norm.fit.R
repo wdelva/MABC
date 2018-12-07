@@ -8,8 +8,6 @@
 #' @param wy wy
 #' @param ... ...
 #' @return A list with imputations and their attributes, including their inverse probability weights
-#'
-#' @import mice
 
 mice.impute.norm.fit <- function(y, ry, x, wy = NULL, ...)
 {

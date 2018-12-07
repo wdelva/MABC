@@ -1,14 +1,132 @@
+#'Imputation by Bayesian linear regression
+#'
+#'Calculates imputations for univariate missing data by Bayesian linear
+#'regression, also known as the normal model.
+#'
+#'@aliases mice.impute.norm norm
+#'@param y Vector to be imputed
+#'@param ry Logical vector of length \code{length(y)} indicating the
+#'the subset \code{y[ry]} of elements in \code{y} to which the imputation
+#'model is fitted. The \code{ry} generally distinguishes the observed
+#'(\code{TRUE}) and missing values (\code{FALSE}) in \code{y}.
+#'@param x Numeric design matrix with \code{length(y)} rows with predictors for
+#'\code{y}. Matrix \code{x} may have no missing values.
+#'@param wy Logical vector of length \code{length(y)}. A \code{TRUE} value
+#'indicates locations in \code{y} for which imputations are created.
+#'@param \dots Other named arguments.
+#'@return Vector with imputed data, same type as \code{y}, and of length
+#'\code{sum(wy)}
+#'@author Stef van Buuren, Karin Groothuis-Oudshoorn
+#'@details
+#' Imputation of \code{y} by the normal model by the method defined by
+#' Rubin (1987, p. 167). The procedure is as follows:
+#'
+#'\enumerate{
+#'\item{Calculate the cross-product matrix \eqn{S=X_{obs}'X_{obs}}.}
+#'\item{Calculate \eqn{V = (S+{diag}(S)\kappa)^{-1}}, with some small ridge
+#'parameter \eqn{\kappa}.}
+#'\item{Calculate regression weights \eqn{\hat\beta = VX_{obs}'y_{obs}.}}
+#'\item{Draw a random variable \eqn{\dot g \sim \chi^2_\nu} with \eqn{\nu=n_1 - q}.}
+#'\item{Calculate \eqn{\dot\sigma^2 = (y_{obs} - X_{obs}\hat\beta)'(y_{obs} - X_{obs}\hat\beta)/\dot g.}}
+#'\item{Draw \eqn{q} independent \eqn{N(0,1)} variates in vector \eqn{\dot z_1}.}
+#'\item{Calculate \eqn{V^{1/2}} by Cholesky decomposition.}
+#'\item{Calculate \eqn{\dot\beta = \hat\beta + \dot\sigma\dot z_1 V^{1/2}}.}
+#'\item{Draw \eqn{n_0} independent \eqn{N(0,1)} variates in vector \eqn{\dot z_2}.}
+#'\item{Calculate the \eqn{n_0} values \eqn{y_{imp} = X_{mis}\dot\beta + \dot z_2\dot\sigma}.}
+#'}
+#'
+#'Using \code{mice.impute.norm} for all columns emulates Schafer's NORM method (Schafer, 1997).
+#'@references
+#'Rubin, D.B (1987). Multiple Imputation for Nonresponse in Surveys. New York: John Wiley & Sons.
+#'
+#'Schafer, J.L. (1997). Analysis of incomplete multivariate data. London: Chapman & Hall.
+#'@family univariate imputation functions
+#'@keywords datagen
+#'@export
+mice.impute.norm <- function(y, ry, x, wy = NULL, ...) {
+  if (is.null(wy)) wy <- !ry
+  x <- cbind(1, as.matrix(x))
+  parm <- .norm.draw(y, ry, x, ...)
+  return(x[wy, ] %*% parm$beta + stats::rnorm(sum(wy)) * parm$sigma)
+}
+
+
 ### Internal functions, copied from the mice package (mice_3.3.0), as available on https://github.com/cran/mice
 # Citation: van Buuren S, Groothuis-Oudshoorn K (2011). “mice: Multivariate Imputation by Chained Equations in R.” Journal of Statistical Software, 45(3), 1-67. https://www.jstatsoft.org/v45/i03/. The mice R package is under License: GPL-2 | GPL-3
 # Code was copied as per https://github.com/cran/mice/commit/53f69107bb81f03e98dcdd19e90186043864c670
 
 # The function ma_exists was copied from https://github.com/alexanderrobitzsch/miceadds/blob/master/R/ma_exists.R
 
-mice.impute.norm <- function(y, ry, x, wy = NULL, ...) {
-  if (is.null(wy)) wy <- !ry
-  x <- cbind(1, as.matrix(x))
-  parm <- .norm.draw(y, ry, x, ...)
-  return(x[wy, ] %*% parm$beta + stats::rnorm(sum(wy)) * parm$sigma)
+norm.draw <- function(y, ry, x, rank.adjust = TRUE, ...)
+  return(.norm.draw(y, ry, x, rank.adjust = TRUE, ...))
+
+.norm.draw <- function(y, ry, x, rank.adjust = TRUE, ...){
+  p <- estimice(x[ry, , drop = FALSE], y[ry], ...)
+  sigma.star <- sqrt(sum((p$r)^2)/stats::rchisq(1, p$df))
+  beta.star <- p$c + (t(chol(p$v)) %*% stats::rnorm(ncol(x))) * sigma.star
+  parm <- list(p$c, beta.star, sigma.star, p$ls.meth)
+  names(parm) <- c("coef", "beta", "sigma", "estimation")
+  if(any(is.na(parm$coef)) & rank.adjust){
+    parm$coef[is.na(parm$coef)] <- 0
+    parm$beta[is.na(parm$beta)] <- 0
+  }
+  return(parm)
+}
+
+estimice <- function(x, y, ls.meth = "qr", ridge = 1e-05, ...){
+  df <- max(length(y) - ncol(x), 1)
+  if (ls.meth == "qr"){
+    qr <- stats::lm.fit(x = x, y = y)
+    c <- t(qr$coef)
+    f <- qr$fitted.values
+    r <- t(qr$residuals)
+    v <- try(solve(as.matrix(crossprod(qr.R(qr$qr)))), silent = TRUE)
+    if(inherits(v, "try-error")){
+      xtx <- as.matrix(crossprod(qr.R(qr$qr)))
+      pen <- diag(xtx) * ridge #calculate ridge penalty
+      v <- solve(xtx + diag(pen)) #add ridge penalty to allow inverse of v
+      mess <- "* A ridge penalty had to be used to calculate the inverse crossproduct of the predictor matrix. Please remove duplicate variables or unique respondent names/numbers from the imputation model. It may be advisable to check the fraction of missing information (fmi) to evaluate the validity of the imputation model"
+      updateLog(out = mess, frame = 6)
+      if (get("printFlag", parent.frame(search.parents("printFlag"))))
+        cat("*") #indicator of added ridge penalty in the printed iteration history
+    }
+    return(list(c=t(c), r=t(r), v=v, df=df, ls.meth=ls.meth))
+  }
+  if (ls.meth == "ridge"){
+    xtx <- crossprod(x)
+    pen <- ridge * diag(xtx)
+    if (length(pen) == 1)
+      pen <- matrix(pen)
+    v <- solve(xtx + diag(pen))
+    c <- t(y) %*% x %*% v
+    r <- y - x %*% t(c)
+    return(list(c=t(c), r=r, v=v, df=df, ls.meth=ls.meth))
+  }
+  if (ls.meth == "svd"){
+    s <- svd(x)
+    c <- s$v %*% ((t(s$u) %*% y) / s$d)
+    f <- x %*% c
+    r <- f - y
+    v <- try(solve(s$v %*% diag(s$d)^2 %*% t(s$v)), silent = TRUE)
+    if(inherits(v, "try-error")){
+      xtx <- s$v %*% diag(s$d)^2 %*% t(s$v)
+      pen <- diag(xtx) * ridge #calculate ridge penalty
+      v <- solve(xtx + diag(pen)) #add ridge penalty to allow inverse of v
+      mess <- "* A ridge penalty had to be used to calculate the inverse crossproduct of the predictor matrix. Please remove duplicate variables or unique respondent names/numbers from the imputation model. It may be advisable to check the fraction of missing information (fmi) to evaluate the validity of the imputation model"
+      updateLog(out = mess, frame = 6)
+      if (get("printFlag", parent.frame(search.parents("printFlag"))))
+        cat("*") #indicator of added ridge penalty in the printed iteration history
+    }
+    return(list(c=c, r=r, v=v, df=df, ls.meth=ls.meth))
+  }
+}
+
+search.parents <- function(name, start = 4){
+  while(inherits(try(get("printFlag", parent.frame(start)), silent = TRUE),
+                 "try-error")){
+    start = start + 1
+  }
+  start
 }
 
 check.data <- function(data, method) {

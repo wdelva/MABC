@@ -270,7 +270,7 @@ MABC <- function(targets.empirical,
       predictorMatrix.give.to.mice <- (1 - diag(1, ncol(df.give.to.mice)))
     }
 
-    # print(c(nrow(df.give.to.mice) - n.experiments, "nrows to give to mice"), quote = FALSE)
+    # print(c(nrow(df.give.to.mice) - n.experiments, "nrows to give to mice"))
     # do imputation
     mice.test <- tryCatch(mice.fit(df.give.to.mice,
                                    m = 1,
@@ -284,7 +284,7 @@ MABC <- function(targets.empirical,
                             return(list())
                           })
 
-    # print(c(length(mice.test), "this is length of mice.test", quote = FALSE))
+    # print(c(length(mice.test), "this is length of mice.test"))
     if (length(mice.test) > 0){
 
       # 11. Turn mice proposals into a new matrix of experiments
