@@ -1,4 +1,4 @@
-#' MICE-assisted calibration with weights
+#' MICE-assisted Approximate Bayesian Calibration
 #'
 #' Produces a list with multiple waves of proposed input parameter values to
 #' match a vector of target features.
@@ -58,23 +58,23 @@
 #' @import tidyverse
 #' @export
 
-MaC.weighted <- function(targets.empirical,
-                         model,
-                RMSD.tol.max = 2,
-                min.givetomice = 64,
-                n.experiments = 256,
-                start.experiments = 0,
-                lls,
-                uls,
-                strict.positive.params,
-                probability.params,
-                inside_prior = TRUE,
-                method = "norm",
-                predictorMatrix = "complete",
-                maxit = 50,
-                maxwaves = 4,
-                n_cores = n_cores,
-                multinode = FALSE){
+MABC <- function(targets.empirical,
+                 model,
+                 RMSD.tol.max = 2,
+                 min.givetomice = 64,
+                 n.experiments = 256,
+                 start.experiments = 0,
+                 lls,
+                 uls,
+                 strict.positive.params,
+                 probability.params,
+                 inside_prior = TRUE,
+                 method = "norm",
+                 predictorMatrix = "complete",
+                 maxit = 50,
+                 maxwaves = 4,
+                 n_cores = n_cores,
+                 multinode = FALSE){
   # 0. Start the clock
   ptm <- proc.time()
   calibration.list <- list() # initiating the list where all the output of MiceABC will be stored
@@ -121,9 +121,9 @@ MaC.weighted <- function(targets.empirical,
 
     if (multinode == TRUE){
       sim.results.simple <- model.snow.run(model = model,
-                                          actual.input.matrix = experiments,
-                                          seed_count = 0,
-                                          n_cores = n_cores)
+                                           actual.input.matrix = experiments,
+                                           seed_count = 0,
+                                           n_cores = n_cores)
     } else {
       sim.results.simple <- model.parallel.run(model = model,
                                                actual.input.matrix = experiments,
@@ -217,9 +217,9 @@ MaC.weighted <- function(targets.empirical,
     # We need to replace full_join with smartbind because there are no NAs if there are matching x. values for the added y. values
 
     df.give.to.mice <- gtools::smartbind(dplyr::select(sim.results.with.design.df.selected,
-                                                      -one_of(c("RMSD", "seed", "wave"))), # adding target to training dataset
-                                        final.intermediate.features.df[rep(1:nrow(final.intermediate.features.df),
-                                                                           each = 1000 * n.experiments), ])
+                                                       -one_of(c("RMSD", "seed", "wave"))), # adding target to training dataset
+                                         final.intermediate.features.df[rep(1:nrow(final.intermediate.features.df),
+                                                                            each = 1000 * n.experiments), ])
 
 
     #print(df.give.to.mice)
@@ -273,13 +273,13 @@ MaC.weighted <- function(targets.empirical,
     # print(c(nrow(df.give.to.mice) - n.experiments, "nrows to give to mice"), quote = FALSE)
     # do imputation
     mice.test <- tryCatch(mice.fit(df.give.to.mice,
-                                     m = 1,
-                                     method = method,
-                                     defaultMethod = method,
-                                     predictorMatrix = predictorMatrix.give.to.mice,
-                                     maxit = maxit,
-                                     printFlag = FALSE,
-                                     seed = 0),
+                                   m = 1,
+                                   method = method,
+                                   defaultMethod = method,
+                                   predictorMatrix = predictorMatrix.give.to.mice,
+                                   maxit = maxit,
+                                   printFlag = FALSE,
+                                   seed = 0),
                           error = function(mice.err) {
                             return(list())
                           })
@@ -324,9 +324,9 @@ MaC.weighted <- function(targets.empirical,
       #
 
       experiments <- matrix(unlist(dplyr::sample_n(experiments.df,
-                                             size = n.experiments,
-                                             replace = TRUE,
-                                             weight = weights.experiments)),
+                                                   size = n.experiments,
+                                                   replace = TRUE,
+                                                   weight = weights.experiments)),
                             byrow = FALSE,
                             ncol = length(x.names))
 
