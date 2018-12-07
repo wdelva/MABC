@@ -19,7 +19,6 @@
 #' @return A list with imputations and their attributes, including their inverse probability weights
 #'
 #' @import mice
-#' @export
 
 sampler.fit <- function(data, m, where, imp, blocks, method, visitSequence,
           predictorMatrix, formulas, blots, post, fromto, printFlag, ...)
@@ -136,8 +135,8 @@ sampler.fit <- function(data, m, where, imp, blocks, method, visitSequence,
             for (j in b) {
               wy <- where[, j]
               ry <- r[, j]
-              imp[[j]][, i] <- model.frame(as.formula(theMethod),
-                                           data[wy, ], na.action = na.pass)
+              imp[[j]][, i] <- stats::model.frame(stats::as.formula(theMethod),
+                                           data[wy, ], na.action = stats::na.pass)
               data[(!ry) & wy, j] <- imp[[j]][(!ry)[wy],
                                               i]
             }
@@ -150,7 +149,7 @@ sampler.fit <- function(data, m, where, imp, blocks, method, visitSequence,
           for (j in blocks[[h]]) {
             if (!is.factor(data[, j])) {
               chainVar[j, k2, ] <- apply(imp[[j]], 2L,
-                                         var, na.rm = TRUE)
+                                         stats::var, na.rm = TRUE)
               chainMean[j, k2, ] <- colMeans(as.matrix(imp[[j]]),
                                              na.rm = TRUE)
             }
@@ -158,7 +157,7 @@ sampler.fit <- function(data, m, where, imp, blocks, method, visitSequence,
               for (mm in seq_len(m)) {
                 nc <- as.integer(factor(imp[[j]][, mm],
                                         levels = levels(data[, j])))
-                chainVar[j, k2, mm] <- var(nc, na.rm = TRUE)
+                chainVar[j, k2, mm] <- stats::var(nc, na.rm = TRUE)
                 chainMean[j, k2, mm] <- mean(nc, na.rm = TRUE)
               }
             }

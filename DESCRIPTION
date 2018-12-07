@@ -16,6 +16,7 @@ Imports:
     stats,
     utils,
     mice (>= 3.3.0),
+    rlang,
     tidyverse,
     dplyr,
     gtools,

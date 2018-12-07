@@ -137,7 +137,9 @@ MaC.weighted <- function(targets.empirical,
 
     names(new.sim.results.with.design.df) <- c(x.names, y.names, "seed", "wave")
 
-    new.sim.results.with.design.df <- new.sim.results.with.design.df %>% dplyr::filter(complete.cases(.))
+    new.sim.results.with.design.complete <- stats::complete.cases(new.sim.results.with.design.df)
+    new.sim.results.with.design.df <- dplyr::filter(new.sim.results.with.design.df,
+                                                    new.sim.results.with.design.complete)
 
     if (wave==1){ # TRUE for the first wave only
       sim.results.with.design.df <- rbind(sim.results.with.design.df,
@@ -256,7 +258,7 @@ MaC.weighted <- function(targets.empirical,
                                    family = "gaussian",
                                    alpha = alpha,
                                    nlambda = 20)
-        remaining.indices <- coef(cvfit, s = "lambda.1se")@i
+        remaining.indices <- stats::coef(cvfit, s = "lambda.1se")@i
         nonzero.names <- names(df.give.to.mice[-nrow(df.give.to.mice), -y.index])[remaining.indices] # These are the columns with non-zero coefficients
         col.indices <- all.names %in% nonzero.names
         predictorMatrix.LASSO[y.index, col.indices] <- 1
@@ -287,7 +289,9 @@ MaC.weighted <- function(targets.empirical,
 
       # 11. Turn mice proposals into a new matrix of experiments
 
-      experiments <- unlist(mice.test$imp) %>% matrix(., byrow = FALSE, ncol = length(x.names))
+      experiments <-matrix(unlist(mice.test$imp),
+                           byrow = FALSE,
+                           ncol = length(x.names))
 
       # Before we check the suitability of the new experimental input parameter values, we must backtransform the log values to natural values
       if (!identical(strict.positive.params, 0)){
@@ -305,8 +309,8 @@ MaC.weighted <- function(targets.empirical,
       # We could add an argument to the function to force the new experiments to respect the boundaries of the prior distributions.
       within.prior.limits <- rep(TRUE, n.experiments)
       if (inside_prior == TRUE){ # experiments.df is a dataframe with n.experiments rows and length(lls) columns
-        params.above.lls <- sweep(x = experiments.df, MARGIN = 2, lls) %>% sign() %>% rowSums()
-        params.below.uls <- sweep(x = -experiments.df, MARGIN = 2, -uls) %>% sign() %>% rowSums()
+        params.above.lls <- sign(sweep(x = experiments.df, MARGIN = 2, lls)) %>% rowSums()
+        params.below.uls <- sign(sweep(x = -experiments.df, MARGIN = 2, -uls)) %>% rowSums()
         within.prior.limits <- params.above.lls %in% length(lls) & params.below.uls %in% length(uls)
         experiments.df <- experiments.df[within.prior.limits, ]
       }
@@ -314,17 +318,17 @@ MaC.weighted <- function(targets.empirical,
 
       # NEW:
       mu.experiments <- colMeans(experiments.df)
-      cov.experiments <- cov(experiments.df)
+      cov.experiments <- stats::cov(experiments.df)
       densities.experiments <- mvtnorm::dmvnorm(experiments.df, mu.experiments, cov.experiments)
       weights.experiments <- 1/densities.experiments
       #
 
-      experiments <- dplyr::sample_n(experiments.df,
+      experiments <- matrix(unlist(dplyr::sample_n(experiments.df,
                                              size = n.experiments,
                                              replace = TRUE,
-                                             weight = weights.experiments) %>% #mice.test$imp.rnorm.values.weights[within.prior.limits]) %>%
-        unlist %>%
-        matrix(., byrow = FALSE, ncol = length(x.names))
+                                             weight = weights.experiments)),
+                            byrow = FALSE,
+                            ncol = length(x.names))
 
       wave <- wave + 1
     } else {

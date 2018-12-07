@@ -352,11 +352,11 @@ remove.lindep <- function(x, y, ry, eps = 1e-04, maxcor = 0.99,
 
   xobs <- x[ry, , drop = FALSE]
   yobs <- as.numeric(y[ry])
-  if (var(yobs) < eps) return(rep(FALSE, ncol(xobs)))
+  if (stats::var(yobs) < eps) return(rep(FALSE, ncol(xobs)))
 
-  keep <- unlist(apply(xobs, 2, var) > eps)
+  keep <- unlist(apply(xobs, 2, stats::var) > eps)
   keep[is.na(keep)] <- FALSE
-  highcor <- suppressWarnings(unlist(apply(xobs, 2, cor, yobs) < maxcor))
+  highcor <- suppressWarnings(unlist(apply(xobs, 2, stats::cor, yobs) < maxcor))
   keep <- keep & highcor
   if (all(!keep))
     updateLog(out = "All predictors are constant or have too high correlation.",
@@ -367,7 +367,7 @@ remove.lindep <- function(x, y, ry, eps = 1e-04, maxcor = 0.99,
   if (k <= 1L) return(keep)  # at most one TRUE
 
   # correlation between x's
-  cx <- cor(xobs[, keep, drop = FALSE], use = "all.obs")
+  cx <- stats::cor(xobs[, keep, drop = FALSE], use = "all.obs")
   eig <- eigen(cx, symmetric = TRUE)
   ncx <- cx
   while (eig$values[k]/eig$values[1] < eps) {
@@ -390,8 +390,42 @@ check.formulas <- function(formulas, data) {
   formulas <- lapply(formulas, expand.dots, data)
   # escape if formula is list of two formula's
   if (any(sapply(formulas, is.list))) return(formulas)
-  formulas <- lapply(formulas, as.formula)
+  formulas <- lapply(formulas, stats::as.formula)
   formulas
+}
+
+handle.oldstyle.formulas <- function(formulas, data) {
+  # converts old-style character vector to formula list
+  oldstyle <- length(formulas) == ncol(data) && is.vector(formulas) &&
+    is.character(formulas)
+  if (!oldstyle) return(formulas)
+  formulas[formulas != ""] <- "~ 0"
+  fl <- as.list(formulas)
+  names(fl) <- names(formulas)
+  fl
+}
+
+is.formula <- function(x){
+  inherits(x, "formula")
+}
+
+hasdot <- function(f) {
+  if(is.recursive(f)) {
+    return(any(sapply(as.list(f), hasdot)))
+  } else {
+    f == as.symbol(".")}
+}
+
+lhs <- function(x) all.vars(stats::update(x, . ~ 1))
+
+expand.dots <- function(formula, data) {
+  if (!is.formula(formula)) return(formula)
+  if (!hasdot(formula)) return(formula)
+
+  y <- lhs(formula)
+  x <- setdiff(colnames(data), y)
+  fs <- paste(paste(y, collapse = "+"), "~", paste(x, collapse = "+"))
+  stats::as.formula(fs)
 }
 
 updateLog <- function(out = NULL, meth = NULL, frame = 1) {
@@ -517,7 +551,7 @@ edit.setup <- function(data, setup,
   for (j in seq_len(ncol(data))) {
     if (!is.passive(meth[j])) {
       d.j <- data[, j]
-      v <- if (is.character(d.j)) NA else var(as.numeric(d.j), na.rm = TRUE)
+      v <- if (is.character(d.j)) NA else stats::var(as.numeric(d.j), na.rm = TRUE)
       constant <- if (allow.na) {
         if (is.na(v)) FALSE else v < 1000 * .Machine$double.eps
       } else {
@@ -622,7 +656,7 @@ initialize.imp <- function(data, m, where, blocks, visitSequence,
             } else {
               imp[[j]][, i] <- data.init[wy, j]
             }
-          } else imp[[j]][, i] <- rnorm(nrow(data))
+          } else imp[[j]][, i] <- stats::rnorm(nrow(data))
         }
       }
     }
@@ -632,8 +666,8 @@ initialize.imp <- function(data, m, where, blocks, visitSequence,
 
 obtain.design <- function(data, formula = ~ .) {
 
-  mf <- model.frame(formula, data = data, na.action = na.pass)
-  model.matrix(formula, data = mf)
+  mf <- stats::model.frame(formula, data = data, na.action = stats::na.pass)
+  stats::model.matrix(formula, data = mf)
 }
 
 sampler.univ <- function(data, r, where, type, formula, method, yname, k,
@@ -642,16 +676,16 @@ sampler.univ <- function(data, r, where, type, formula, method, yname, k,
 
   if (calltype == "type") {
     vars <- colnames(data)[type != 0]
-    formula <- reformulate(setdiff(vars, j), response = j)
-    formula <- update(formula, ". ~ . ")
+    formula <- stats::reformulate(setdiff(vars, j), response = j)
+    formula <- stats::update(formula, ". ~ . ")
   }
 
   if (calltype == "formula") {
     # move terms other than j from lhs to rhs
     ymove <- setdiff(lhs(formula), j)
-    formula <- update(formula, paste(j, " ~ . "))
+    formula <- stats::update(formula, paste(j, " ~ . "))
     if (length(ymove) > 0L)
-      formula <- update(formula, paste("~ . + ", paste(ymove, collapse = "+")))
+      formula <- stats::update(formula, paste("~ . + ", paste(ymove, collapse = "+")))
   }
 
   # get the model matrix
@@ -659,7 +693,7 @@ sampler.univ <- function(data, r, where, type, formula, method, yname, k,
 
   # expand type vector to model matrix, remove intercept
   if (calltype == "type") {
-    type <- type[labels(terms(formula))][attr(x, "assign")]
+    type <- type[labels(stats::terms(formula))][attr(x, "assign")]
     x <- x[, -1L, drop = FALSE]
     names(type) <- colnames(x)
   }
@@ -671,8 +705,8 @@ sampler.univ <- function(data, r, where, type, formula, method, yname, k,
 
   # define y, ry and wy
   y <- data[, j]
-  ry <- complete.cases(x, y) & r[, j]
-  wy <- complete.cases(x) & where[, j]
+  ry <- stats::complete.cases(x, y) & r[, j]
+  wy <- stats::complete.cases(x) & where[, j]
 
   # nothing to impute
   if (all(!wy)) return(numeric(0))
@@ -705,7 +739,7 @@ find.collinear <- function(x, threshold = 0.999, ...) {
   ord <- order(nr, decreasing = TRUE)
   xo <- x[, ord, drop = FALSE]  ## SvB 24mar2011
   varnames <- dimnames(xo)[[2]]
-  z <- suppressWarnings(cor(xo, use = "pairwise.complete.obs"))
+  z <- suppressWarnings(stats::cor(xo, use = "pairwise.complete.obs"))
   hit <- outer(seq_len(nvar), seq_len(nvar), "<") & (abs(z) >= threshold)
   out <- apply(hit, 2, any, na.rm = TRUE)
   return(varnames[out])

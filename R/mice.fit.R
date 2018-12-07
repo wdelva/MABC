@@ -21,7 +21,6 @@
 #' @return A list with imputations and their attributes, including their inverse probability weights
 #'
 #' @import mice
-#' @export
 
 mice.fit <- function(data, m = 5, method = "norm", predictorMatrix, where = NULL,
           blocks, visitSequence = NULL, formulas, blots = NULL, post = NULL,
@@ -138,7 +137,7 @@ mice.fit <- function(data, m = 5, method = "norm", predictorMatrix, where = NULL
   # Let's turn this list of rnorm.values with one single-column dataframe per missing variable into a single vector or
   # dataframe with one value per imputation. The values are simply the product of the r.norm.values, divided by
   # the sum of all r.norm.values
-  imp.rnorm.values.matrix <- matrix(dnorm(as.numeric(unlist(imp.rnorm.values)), log = TRUE),
+  imp.rnorm.values.matrix <- matrix(stats::dnorm(as.numeric(unlist(imp.rnorm.values)), log = TRUE),
                                     nrow = max(apply(is.na(data), 2, sum)))
   # Instead of taking the product of the densities, we take the sum of the logdensities
   imp.rnorm.values.sumlog <- apply(imp.rnorm.values.matrix, 1, FUN = sum)
@@ -159,7 +158,7 @@ mice.fit <- function(data, m = 5, method = "norm", predictorMatrix, where = NULL
                   formulas = formulas, post = post, blots = blots, seed = seed,
                   iteration = q$iteration, lastSeedValue = .Random.seed,
                   chainMean = q$chainMean, chainVar = q$chainVar, loggedEvents = loggedEvents,
-                  version = packageVersion("mice"), date = Sys.Date())
+                  version = utils::packageVersion("mice"), date = Sys.Date())
   oldClass(midsobj) <- "mids"
   if (!is.null(midsobj$loggedEvents))
     warning("Number of logged events: ", nrow(midsobj$loggedEvents),

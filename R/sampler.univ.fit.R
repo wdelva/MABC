@@ -16,7 +16,6 @@
 #' @return A list with imputations and their attributes, including their inverse probability weights
 #'
 #' @import mice
-#' @export
 
 sampler.univ.fit <- function(data, r, where, type, formula, method, yname, k, calltype = "type",
           user, ...)
@@ -33,19 +32,19 @@ sampler.univ.fit <- function(data, r, where, type, formula, method, yname, k, ca
   j <- yname[1L]
   if (calltype == "type") {
     vars <- colnames(data)[type != 0]
-    formula <- reformulate(setdiff(vars, j), response = j)
-    formula <- update(formula, ". ~ . ")
+    formula <- stats::reformulate(setdiff(vars, j), response = j)
+    formula <- stats::update(formula, ". ~ . ")
   }
   if (calltype == "formula") {
     ymove <- setdiff(lhs(formula), j)
-    formula <- update(formula, paste(j, " ~ . "))
+    formula <- stats::update(formula, paste(j, " ~ . "))
     if (length(ymove) > 0L)
-      formula <- update(formula, paste("~ . + ", paste(ymove,
+      formula <- stats::update(formula, paste("~ . + ", paste(ymove,
                                                        collapse = "+")))
   }
   x <- obtain.design(data, formula)
   if (calltype == "type") {
-    type <- type[labels(terms(formula))][attr(x, "assign")]
+    type <- type[labels(stats::terms(formula))][attr(x, "assign")]
     x <- x[, -1L, drop = FALSE]
     names(type) <- colnames(x)
   }
@@ -55,8 +54,8 @@ sampler.univ.fit <- function(data, r, where, type, formula, method, yname, k, ca
     names(type) <- colnames(x)
   }
   y <- data[, j]
-  ry <- complete.cases(x, y) & r[, j]
-  wy <- complete.cases(x) & where[, j]
+  ry <- stats::complete.cases(x, y) & r[, j]
+  wy <- stats::complete.cases(x) & where[, j]
   if (all(!wy))
     return(numeric(0))
   cc <- wy[where[, j]]

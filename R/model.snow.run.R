@@ -21,7 +21,9 @@ model.snow.run <- function(model,
   doSNOW::registerDoSNOW(cl)
 
   nb_simul <- nrow(actual.input.matrix)
-
+  # To avoid the note "no visible binding for global variable ‘irun’" when
+  # running R CMD check
+  irun <- NULL
   modelfeatures <- foreach(irun = 1:nb_simul,
                            .inorder=TRUE,
                            .combine="rbind") %dopar% {
