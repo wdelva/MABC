@@ -179,7 +179,7 @@ MaC.weighted <- function(targets.empirical,
       n.close.to.targets <- sum(RMSD <= RMSD.tol, na.rm = TRUE)
       #n.close.to.targets.mat[(1+steps.intermediate.targets), (1+steps.RMSD.tol)] <- n.close.to.targets
       #large.enough.training.df <- n.close.to.targets >= min.givetomice
-      RMSD.tol <- RMSD.tol + 0.01  # Increasing RMSD.tol
+      RMSD.tol <- RMSD.tol + 0.0001  # Increasing RMSD.tol
     }
     sim.results.with.design.df$RMSD <- RMSD
     final.intermediate.features <- targets.empirical
@@ -270,7 +270,7 @@ MaC.weighted <- function(targets.empirical,
       predictorMatrix.give.to.mice <- (1 - diag(1, ncol(df.give.to.mice)))
     }
 
-    print(c(nrow(df.give.to.mice) - n.experiments, "nrows to give to mice"), quote = FALSE)
+    # print(c(nrow(df.give.to.mice) - n.experiments, "nrows to give to mice"), quote = FALSE)
     # do imputation
     mice.test <- tryCatch(mice.fit(df.give.to.mice,
                                      m = 1,
@@ -284,7 +284,7 @@ MaC.weighted <- function(targets.empirical,
                             return(list())
                           })
 
-    print(c(length(mice.test), "this is length of mice.test", quote = FALSE))
+    # print(c(length(mice.test), "this is length of mice.test", quote = FALSE))
     if (length(mice.test) > 0){
 
       # 11. Turn mice proposals into a new matrix of experiments

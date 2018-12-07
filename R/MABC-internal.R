@@ -4,6 +4,13 @@
 
 # The function ma_exists was copied from https://github.com/alexanderrobitzsch/miceadds/blob/master/R/ma_exists.R
 
+mice.impute.norm <- function(y, ry, x, wy = NULL, ...) {
+  if (is.null(wy)) wy <- !ry
+  x <- cbind(1, as.matrix(x))
+  parm <- .norm.draw(y, ry, x, ...)
+  return(x[wy, ] %*% parm$beta + stats::rnorm(sum(wy)) * parm$sigma)
+}
+
 check.data <- function(data, method) {
   check.dataform(data)
 
