@@ -162,25 +162,41 @@ MABC <- function(targets.empirical,
 
     # 3. Find intermediate features and RMSD.tol for which n.close.to.targets >= min.givetomice
     # targets.diff <- targets.empirical - sim.results.with.design.df.median.features # experim.median.features # First we determine how far the empirical targets are away from the median features of the executed experiments
-    candidate.RMSD.tol <- Inf # Initially, we assume that the RMSD cut-off needs to be infinitely large to have sufficient observations to give to mice.
+    #candidate.RMSD.tol <- Inf # Initially, we assume that the RMSD cut-off needs to be infinitely large to have sufficient observations to give to mice.
 
-    # Initiate n.close.to.targets
-    n.close.to.targets <- 0 # This will be overwritten.
-    # candidate.intermediate.features <- targets.empirical # We start with the empirical target features
-    RMSD.tol <- 0 # This will be increased if n.close.to.targets < min.givetomice for this tolerance level
+    ### OLD, SLOW APPROACH
+    # # Initiate n.close.to.targets
+    # n.close.to.targets <- 0 # This will be overwritten.
+    # # candidate.intermediate.features <- targets.empirical # We start with the empirical target features
+    # RMSD.tol <- 0 # This will be increased if n.close.to.targets < min.givetomice for this tolerance level
+    #
+    # while (n.close.to.targets < min.givetomice & RMSD.tol <= RMSD.tol.max){
+    #
+    #   diff.matrix <- sweep(x = sim.results.with.design.df[ , ((1 + x.offset):(x.offset + length(targets.empirical)))], MARGIN = 2, targets.empirical)
+    #   rel.diff.matrix <- sweep(diff.matrix, MARGIN = 2, targets.empirical, FUN = "/")
+    #   squared.rel.diff.matrix <- rel.diff.matrix^2
+    #   sum.squared.rel.diff <- rowSums(squared.rel.diff.matrix)
+    #   RMSD <- sqrt(sum.squared.rel.diff / length(targets.empirical))
+    #   n.close.to.targets <- sum(RMSD <= RMSD.tol, na.rm = TRUE)
+    #   #n.close.to.targets.mat[(1+steps.intermediate.targets), (1+steps.RMSD.tol)] <- n.close.to.targets
+    #   #large.enough.training.df <- n.close.to.targets >= min.givetomice
+    #   RMSD.tol <- RMSD.tol + 0.0001  # Increasing RMSD.tol
+    # }
 
-    while (n.close.to.targets < min.givetomice & RMSD.tol <= RMSD.tol.max){
+    ### NEW, FAST APPROACH
+    diff.matrix <- sweep(x = sim.results.with.design.df[ , ((1 + x.offset):(x.offset + length(targets.empirical)))],
+                         MARGIN = 2,
+                         targets.empirical)
+    rel.diff.matrix <- sweep(diff.matrix, MARGIN = 2,
+                             targets.empirical, FUN = "/")
+    squared.rel.diff.matrix <- rel.diff.matrix^2
+    sum.squared.rel.diff <- rowSums(squared.rel.diff.matrix)
+    RMSD <- sqrt(sum.squared.rel.diff / length(targets.empirical))
+    n.close.to.targets <- min.givetomice
+    ###
 
-      diff.matrix <- sweep(x = sim.results.with.design.df[ , ((1 + x.offset):(x.offset + length(targets.empirical)))], MARGIN = 2, targets.empirical)
-      rel.diff.matrix <- sweep(diff.matrix, MARGIN = 2, targets.empirical, FUN = "/")
-      squared.rel.diff.matrix <- rel.diff.matrix^2
-      sum.squared.rel.diff <- rowSums(squared.rel.diff.matrix)
-      RMSD <- sqrt(sum.squared.rel.diff / length(targets.empirical))
-      n.close.to.targets <- sum(RMSD <= RMSD.tol, na.rm = TRUE)
-      #n.close.to.targets.mat[(1+steps.intermediate.targets), (1+steps.RMSD.tol)] <- n.close.to.targets
-      #large.enough.training.df <- n.close.to.targets >= min.givetomice
-      RMSD.tol <- RMSD.tol + 0.0001  # Increasing RMSD.tol
-    }
+
+
     sim.results.with.design.df$RMSD <- RMSD
     final.intermediate.features <- targets.empirical
 
@@ -207,83 +223,85 @@ MABC <- function(targets.empirical,
     # 6. Record selected experiments to give to mice for this wave
     calibration.list$selected.experiments[[wave]] <- sim.results.with.design.df.selected
 
-    # 7. Put intermediate features in dataframe format
-    final.intermediate.features.df <- as.data.frame(matrix(final.intermediate.features, ncol = length(final.intermediate.features)))
-    names(final.intermediate.features.df) <- y.names
+    mice.test <- list()
+    if (max.RMSD <= RMSD.tol.max){
+      # 7. Put intermediate features in dataframe format
+      final.intermediate.features.df <- as.data.frame(matrix(final.intermediate.features, ncol = length(final.intermediate.features)))
+      names(final.intermediate.features.df) <- y.names
 
-    # 8. Prepare dataframe to give to mice: selected experiments plus intermediate features
+      # 8. Prepare dataframe to give to mice: selected experiments plus intermediate features
 
-    ## DEBUGGING:
-    # We need to replace full_join with smartbind because there are no NAs if there are matching x. values for the added y. values
+      ## DEBUGGING:
+      # We need to replace full_join with smartbind because there are no NAs if there are matching x. values for the added y. values
 
-    df.give.to.mice <- gtools::smartbind(dplyr::select(sim.results.with.design.df.selected,
-                                                       -one_of(c("RMSD", "seed", "wave"))), # adding target to training dataset
-                                         final.intermediate.features.df[rep(1:nrow(final.intermediate.features.df),
-                                                                            each = 1000 * n.experiments), ])
+      df.give.to.mice <- gtools::smartbind(dplyr::select(sim.results.with.design.df.selected,
+                                                         -one_of(c("RMSD", "seed", "wave"))), # adding target to training dataset
+                                           final.intermediate.features.df[rep(1:nrow(final.intermediate.features.df),
+                                                                              each = 1000 * n.experiments), ])
 
 
-    #print(df.give.to.mice)
-    if (!identical(strict.positive.params, 0)){
-      df.give.to.mice[, strict.positive.params] <- log(df.give.to.mice[, strict.positive.params])
-    }
-    # probability.params <- 14
-    if (!identical(probability.params, 0)){
-      df.give.to.mice[, probability.params] <- log(df.give.to.mice[, probability.params] / (1 - df.give.to.mice[, probability.params])) # logit transformation
-    }
-
-    # 9. Override default predictorMatrix with a sparser matrix
-    # Let's think a bit more carefully about which variables should be allowed as input for which input parameters.
-    # IN THE FUTURE THIS COULD BE AUTOMATED WITH VARIABLE SELECTION ALGORITHMS.
-    # predictorMatrix <- (1 - diag(1, ncol(df.give.to.mice))) # This is the default matrix.
-
-    #### NEW: Using LASSO to create predictorMatrix (and ignoring the one that was given as a function argument)
-
-    if (is.numeric(predictorMatrix)){
-      predictorMatrix.give.to.mice <- predictorMatrix
-    }
-
-    if (identical(predictorMatrix, "LASSO")){
-      predictorMatrix.LASSO <- diag(0, ncol = ncol(df.give.to.mice), nrow = ncol(df.give.to.mice))
-      all.names <- names(df.give.to.mice)
-
-      nrows.training.df <- dplyr::select(sim.results.with.design.df.selected,
-                                         -one_of(c("RMSD", "seed", "wave"))) %>% nrow()
-
-      for(y.index in 1:ncol(df.give.to.mice)){
-        x4lasso <- as.matrix(df.give.to.mice[1:nrows.training.df, -y.index])
-        y4lasso <- as.numeric(df.give.to.mice[1:nrows.training.df, y.index])
-        alpha <- 1
-        cvfit <- glmnet::cv.glmnet(x = x4lasso,
-                                   y = y4lasso,
-                                   family = "gaussian",
-                                   alpha = alpha,
-                                   nlambda = 20)
-        remaining.indices <- stats::coef(cvfit, s = "lambda.1se")@i
-        nonzero.names <- names(df.give.to.mice[-nrow(df.give.to.mice), -y.index])[remaining.indices] # These are the columns with non-zero coefficients
-        col.indices <- all.names %in% nonzero.names
-        predictorMatrix.LASSO[y.index, col.indices] <- 1
+      #print(df.give.to.mice)
+      if (!identical(strict.positive.params, 0)){
+        df.give.to.mice[, strict.positive.params] <- log(df.give.to.mice[, strict.positive.params])
       }
-      predictorMatrix.give.to.mice <- predictorMatrix.LASSO
+      # probability.params <- 14
+      if (!identical(probability.params, 0)){
+        df.give.to.mice[, probability.params] <- log(df.give.to.mice[, probability.params] / (1 - df.give.to.mice[, probability.params])) # logit transformation
+      }
+
+      # 9. Override default predictorMatrix with a sparser matrix
+      # Let's think a bit more carefully about which variables should be allowed as input for which input parameters.
+      # IN THE FUTURE THIS COULD BE AUTOMATED WITH VARIABLE SELECTION ALGORITHMS.
+      # predictorMatrix <- (1 - diag(1, ncol(df.give.to.mice))) # This is the default matrix.
+
+      #### NEW: Using LASSO to create predictorMatrix (and ignoring the one that was given as a function argument)
+
+      if (is.numeric(predictorMatrix)){
+        predictorMatrix.give.to.mice <- predictorMatrix
+      }
+
+      if (identical(predictorMatrix, "LASSO")){
+        predictorMatrix.LASSO <- diag(0, ncol = ncol(df.give.to.mice), nrow = ncol(df.give.to.mice))
+        all.names <- names(df.give.to.mice)
+
+        nrows.training.df <- dplyr::select(sim.results.with.design.df.selected,
+                                           -one_of(c("RMSD", "seed", "wave"))) %>% nrow()
+
+        for(y.index in 1:ncol(df.give.to.mice)){
+          x4lasso <- as.matrix(df.give.to.mice[1:nrows.training.df, -y.index])
+          y4lasso <- as.numeric(df.give.to.mice[1:nrows.training.df, y.index])
+          alpha <- 1
+          cvfit <- glmnet::cv.glmnet(x = x4lasso,
+                                     y = y4lasso,
+                                     family = "gaussian",
+                                     alpha = alpha,
+                                     nlambda = 20)
+          remaining.indices <- stats::coef(cvfit, s = "lambda.1se")@i
+          nonzero.names <- names(df.give.to.mice[-nrow(df.give.to.mice), -y.index])[remaining.indices] # These are the columns with non-zero coefficients
+          col.indices <- all.names %in% nonzero.names
+          predictorMatrix.LASSO[y.index, col.indices] <- 1
+        }
+        predictorMatrix.give.to.mice <- predictorMatrix.LASSO
+      }
+
+      if (identical(predictorMatrix, "complete")){
+        predictorMatrix.give.to.mice <- (1 - diag(1, ncol(df.give.to.mice)))
+      }
+
+      # print(c(nrow(df.give.to.mice) - n.experiments, "nrows to give to mice"))
+      # do imputation
+      mice.test <- tryCatch(mice.fit(df.give.to.mice,
+                                     m = 1,
+                                     method = method,
+                                     defaultMethod = method,
+                                     predictorMatrix = predictorMatrix.give.to.mice,
+                                     maxit = maxit,
+                                     printFlag = FALSE,
+                                     seed = 0),
+                            error = function(mice.err) {
+                              return(list())
+                            })
     }
-
-    if (identical(predictorMatrix, "complete")){
-      predictorMatrix.give.to.mice <- (1 - diag(1, ncol(df.give.to.mice)))
-    }
-
-    # print(c(nrow(df.give.to.mice) - n.experiments, "nrows to give to mice"))
-    # do imputation
-    mice.test <- tryCatch(mice.fit(df.give.to.mice,
-                                   m = 1,
-                                   method = method,
-                                   defaultMethod = method,
-                                   predictorMatrix = predictorMatrix.give.to.mice,
-                                   maxit = maxit,
-                                   printFlag = FALSE,
-                                   seed = 0),
-                          error = function(mice.err) {
-                            return(list())
-                          })
-
     # print(c(length(mice.test), "this is length of mice.test"))
     if (length(mice.test) > 0){
 

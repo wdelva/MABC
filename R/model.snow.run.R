@@ -17,7 +17,8 @@ model.snow.run <- function(model,
                           actual.input.matrix,
                           seed_count = 0,
                           n_cores = 3){
-  cl <- snow::makeCluster(n_cores, type = "SOCK")
+
+  cl <- snow::makeCluster(n_cores, type="MPI")
   doSNOW::registerDoSNOW(cl)
 
   nb_simul <- nrow(actual.input.matrix)
