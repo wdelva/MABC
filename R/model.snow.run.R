@@ -19,7 +19,8 @@ model.snow.run <- function(model,
                           seed_count = 0,
                           n_cores = 3){
   library(SimInf)
-  cl <- snow::makeCluster(n_cores, type="MPI")
+  library(snow)
+  cl <- makeCluster(n_cores, type="MPI")
   doSNOW::registerDoSNOW(cl)
 
   nb_simul <- nrow(actual.input.matrix)
@@ -32,7 +33,7 @@ model.snow.run <- function(model,
                              seed <- seed_count + irun
                              model(c(seed, actual.input.matrix[irun, ]))
                            }
-  snow::stopCluster(cl)
+  stopCluster(cl)
   modelfeatures.array <- as.array(cbind(modelfeatures,
                                         seed_count + 1:nb_simul))
   dimnames(modelfeatures.array) <- NULL
