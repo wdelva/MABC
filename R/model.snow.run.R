@@ -11,15 +11,12 @@
 #' @import foreach
 #' @import snow
 #' @import doSNOW
-#' @import SimInf
 #' @export
 
 model.snow.run <- function(model,
                           actual.input.matrix,
                           seed_count = 0,
                           n_cores = 3){
-  library(SimInf)
-  library(snow)
   cl <- makeCluster(n_cores, type="MPI")
   doSNOW::registerDoSNOW(cl)
 
