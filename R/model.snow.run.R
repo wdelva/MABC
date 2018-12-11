@@ -26,6 +26,7 @@ model.snow.run <- function(model,
   irun <- NULL
   modelfeatures <- foreach(irun = 1:nb_simul,
                            .inorder=TRUE,
+                           .packages = "SimInf",
                            .combine="rbind") %dopar% {
                              seed <- seed_count + irun
                              model(c(seed, actual.input.matrix[irun, ]))
