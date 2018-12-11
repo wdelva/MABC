@@ -359,5 +359,9 @@ MABC <- function(targets.empirical,
 
   # 16. Stop clock and return calibration list
   calibration.list$secondspassed <- proc.time() - ptm # Stop the clock
+
+  print(c("time", calibration.list$secondspassed), quote = FALSE)
+
+
   return(calibration.list)
 }
