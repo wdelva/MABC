@@ -12,16 +12,3 @@ test_that("model.parallel.run works", {
                       update = TRUE,
                       print = TRUE)
 })
-
-test_that("model.mpi.run works", {
-  expect_known_output(model.mpi.run(model = helper.sir,
-                                         actual.input.matrix = matrix(c(0.2, 0.02),
-                                                                      ncol = 2,
-                                                                      nrow = 4,
-                                                                      byrow =  TRUE),
-                                         seed_count = 0,
-                                         n_cores = 3),
-                      file = "/tmp/test.model.mpi.run",
-                      update = TRUE,
-                      print = TRUE)
-})
