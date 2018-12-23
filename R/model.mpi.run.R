@@ -8,29 +8,26 @@
 #' @param n_cores Number of slave workers available for parallel running of the model
 #' @return a matrix of model features and the seed of the random number
 #'   generator
-#' @import foreach
+#' @import Rmpi
 #' @export
 
 model.mpi.run <- function(model,
                           actual.input.matrix,
                           seed_count = 0,
                           n_cores = 3){
-  cl <- doMPI::startMPIcluster(count = n_cores)
-  doMPI::registerDoMPI(cl)
-
   nb_simul <- nrow(actual.input.matrix)
-  # To avoid the note "no visible binding for global variable ‘irun’" when
-  # running R CMD check
-  irun <- NULL
-  modelfeatures <- foreach(irun = 1:nb_simul,
-                           .inorder=TRUE,
-                           .combine="rbind") %dopar% {
-                             seed <- seed_count + irun
-                             model(c(seed, actual.input.matrix[irun, ]))
-                           }
-  doMPI::closeCluster(cl)
-  modelfeatures.array <- as.array(cbind(modelfeatures,
-                                        seed_count + 1:nb_simul))
-  dimnames(modelfeatures.array) <- NULL
-  return(modelfeatures.array)
+  list_param <- list(NULL)
+  for (i in 1:nb_simul) {
+    param <- c((seed_count + i), actual.input.matrix[i, ])
+    list_param[[i]] <- param
+  }
+  mpi.spawn.Rslaves(nslaves = n_cores)
+  mpi.bcast.cmd(library(SimInf))
+  mpi.bcast.Robj2slave(model)
+  modelfeatures.list <- mpi.iapplyLB(1:nb_simul,
+                                     model,
+                                     list_param = list_param)
+  modelfeatures <- do.call(rbind, modelfeatures.list)
+  mpi.close.Rslaves()
+  return(modelfeatures)
 }
