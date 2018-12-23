@@ -26,6 +26,7 @@ Imports:
     pcaPP,
     parallel,
     randtoolbox,
+    Rmpi,
     foreach,
     doSNOW,
     snow
@@ -34,5 +35,4 @@ RoxygenNote: 6.1.0
 Suggests: 
     testthat,
     SimInf,
-    Rmpi,
     doMPI

@@ -29,5 +29,6 @@ model.mpi.run <- function(model,
                                      list_param = list_param)
   modelfeatures <- do.call(rbind, modelfeatures.list)
   mpi.close.Rslaves()
+  mpi.exit()
   return(modelfeatures)
 }
