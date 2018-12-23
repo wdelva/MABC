@@ -1,4 +1,5 @@
-helper.sir <- function(design){ # one row of the design.df dataframe is c(id, b, g)
+helper.sir <- function(index, list_param){ # one element of the list_param is c(id, b, g)
+  design <- list_param[[index]]
   library(SimInf)
   u0 <- data.frame(S = 99000,
                    I = 1000,
