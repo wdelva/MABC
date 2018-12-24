@@ -120,7 +120,7 @@ MABC <- function(targets.empirical,
     }
 
     if (multinode == TRUE){
-      sim.results.simple <- model.snow.run(model = model,
+      sim.results.simple <- model.mpi.run(model = model,
                                            actual.input.matrix = experiments,
                                            seed_count = 0,
                                            n_cores = n_cores)

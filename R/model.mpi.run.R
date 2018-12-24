@@ -33,5 +33,5 @@ model.mpi.run <- function(model,
     modelfeatures <- do.call(rbind, modelfeatures.list)
     mpi.close.Rslaves()
   }
-  return(modelfeatures)
+  return(cbind(modelfeatures, seed_count + 1:nb_simul))
 }
