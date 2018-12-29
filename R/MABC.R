@@ -236,8 +236,7 @@ MABC <- function(targets.empirical,
 
       df.give.to.mice <- gtools::smartbind(dplyr::select(sim.results.with.design.df.selected,
                                                          -one_of(c("RMSD", "seed", "wave"))), # adding target to training dataset
-                                           final.intermediate.features.df[rep(1:nrow(final.intermediate.features.df),
-                                                                              each = 1000 * n.experiments), ])
+                                           final.intermediate.features.df)
 
 
       #print(df.give.to.mice)
@@ -291,7 +290,7 @@ MABC <- function(targets.empirical,
       # print(c(nrow(df.give.to.mice) - n.experiments, "nrows to give to mice"))
       # do imputation
       mice.test <- tryCatch(mice.fit(df.give.to.mice,
-                                     m = 1,
+                                     m = 2 * n.experiments,
                                      method = method,
                                      defaultMethod = method,
                                      predictorMatrix = predictorMatrix.give.to.mice,

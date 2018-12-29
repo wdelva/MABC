@@ -24,7 +24,7 @@ model.mpi.run <- function(model,
       list_param[[i]] <- param
     }
     mpi.spawn.Rslaves(nslaves = n_cores)
-    mpi.bcast.cmd(eval(call("library", "RSimpactHelper")))
+    mpi.bcast.cmd(eval(call("library", "SimInf")))
     #mpi.bcast.cmd(library(SimInf))
     mpi.bcast.Robj2slave(model)
     modelfeatures.list <- mpi.iapplyLB(1:nb_simul,
