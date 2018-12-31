@@ -289,17 +289,33 @@ MABC <- function(targets.empirical,
 
       # print(c(nrow(df.give.to.mice) - n.experiments, "nrows to give to mice"))
       # do imputation
-      mice.test <- tryCatch(mice.fit(df.give.to.mice,
-                                     m = 2 * n.experiments,
-                                     method = method,
-                                     defaultMethod = method,
-                                     predictorMatrix = predictorMatrix.give.to.mice,
-                                     maxit = maxit,
-                                     printFlag = FALSE,
-                                     seed = 0),
+      # mice.test <- tryCatch(mice.fit(df.give.to.mice,
+      #                                m = 1 * n.experiments,
+      #                                method = method,
+      #                                defaultMethod = method,
+      #                                predictorMatrix = predictorMatrix.give.to.mice,
+      #                                maxit = maxit,
+      #                                printFlag = FALSE,
+      #                                seed = 0),
+      #                       error = function(mice.err) {
+      #                         return(list())
+      #                       })
+
+      mice.test <- tryCatch(mice.fit.parallel(df.give.to.mice,
+                                              mice.model = mice.fit.wrapper,
+                                              m = 1,
+                                              n_cores = 1,
+                                              n_experiments = 2 * n.experiments,
+                                              method = method,
+                                              defaultMethod = method,
+                                              predictorMatrix = predictorMatrix.give.to.mice,
+                                              maxit = maxit,
+                                              printFlag = FALSE,
+                                              seed.init = -1),
                             error = function(mice.err) {
                               return(list())
                             })
+
     }
     # print(c(length(mice.test), "this is length of mice.test"))
     if (length(mice.test) > 0){
