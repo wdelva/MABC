@@ -15,9 +15,10 @@ LazyData: true
 Imports:
     stats,
     utils,
-    mice (>= 3.3.0),
+    mice (>= 3.3.4),
     rlang,
     tidyverse,
+    purrr,
     dplyr,
     gtools,
     glmnet,
