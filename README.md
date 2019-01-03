@@ -56,7 +56,7 @@ the above two functions.
   
   library(devtools)
   
-  devtools::install_github(wdelva/MABC) 
+  install_github("wdelva/MABC")
 
 ## COPYRIGHT AND LICENSING INFORMATION
 
