@@ -17,9 +17,13 @@
 #'   to which MICE is applied
 #' @param n.experiments Number of parameter combinations in each wave of model
 #' runs
-#' @param start.experiments Matrix of experiments (possibly output from a
-#'   previous calibration). Set to 0, start experiments will be drawn uniformly
-#'   from the prior distributions.
+#' @param start.experiments If set to NULL (default), start experiments will be
+#'   drawn uniformly from the prior distributions. If a matrix of input
+#'   parameter values, possibly output from a previous calibration, models with
+#'   these inputs will be run, instead of drawing from the prior distributions.
+#'   To resume where a previous calibration ended, you can input
+#'   start.experiments as a data.frame with inputs, outputs, seed, wave and RMSD
+#'   values.
 #' @param lls Vector of lower limits of the prior distribution of input
 #'   parameter values
 #' @param uls Vector of upper limits of the prior distribution of input
@@ -63,7 +67,7 @@ MABC <- function(targets.empirical,
                  RMSD.tol.max = 2,
                  min.givetomice = 64,
                  n.experiments = 256,
-                 start.experiments = 0,
+                 start.experiments = NULL,
                  lls,
                  uls,
                  strict.positive.params,
@@ -106,7 +110,7 @@ MABC <- function(targets.empirical,
     print(c("wave", wave), quote = FALSE)
 
     if (wave == 1){
-      if (identical(start.experiments, 0)) {
+      if (identical(start.experiments, NULL)) {
         # 2. Initial, naive results, based on Sobol sequences
         range.width <- uls - lls
         ll.mat <- matrix(rep(lls, n.experiments), nrow = n.experiments, byrow = TRUE)
@@ -114,90 +118,66 @@ MABC <- function(targets.empirical,
         sobol.seq.0.1 <- sobol(n = n.experiments, dim = length(lls), init = TRUE, scrambling = 1, seed = 1, normal = FALSE)
         experiments <- ll.mat + sobol.seq.0.1 * range.width.mat
       } else {
-        experiments <- start.experiments
+        if (ncol(start.experiments) == input.vector.length) {
+          experiments <- start.experiments
+        }
       }
 
     }
 
-    if (multinode == TRUE){
-      sim.results.simple <- model.mpi.run(model = model,
-                                           actual.input.matrix = experiments,
-                                           seed_count = 0,
-                                           n_cores = n_cores)
+    if (exists("experiments", mode = "numeric")){
+      if (multinode == TRUE){
+        sim.results.simple <- model.mpi.run(model = model,
+                                            actual.input.matrix = experiments,
+                                            seed_count = 0,
+                                            n_cores = n_cores)
+      } else {
+        sim.results.simple <- model.parallel.run(model = model,
+                                                 actual.input.matrix = experiments,
+                                                 seed_count = 0,
+                                                 n_cores = n_cores)
+      }
+
+      new.sim.results.with.design.df <- as.data.frame(cbind(experiments,
+                                                            sim.results.simple,
+                                                            rep(wave, times = nrow(experiments))))
+
+      names(new.sim.results.with.design.df) <- c(x.names, y.names, "seed", "wave")
+
+      new.sim.results.with.design.complete <- stats::complete.cases(new.sim.results.with.design.df)
+      new.sim.results.with.design.df <- dplyr::filter(new.sim.results.with.design.df,
+                                                      new.sim.results.with.design.complete)
+
+      if (wave == 1){ # TRUE for the first wave only
+        sim.results.with.design.df <- rbind(sim.results.with.design.df,
+                                            new.sim.results.with.design.df)
+      } else {
+        sim.results.with.design.df <- rbind(dplyr::select(sim.results.with.design.df,
+                                                          -contains("RMSD")),
+                                            new.sim.results.with.design.df)
+      }
+
+
+
+      diff.matrix <- sweep(x = sim.results.with.design.df[ , ((1 + x.offset):(x.offset + length(targets.empirical)))],
+                           MARGIN = 2,
+                           targets.empirical)
+      rel.diff.matrix <- sweep(diff.matrix, MARGIN = 2,
+                               targets.empirical, FUN = "/")
+      squared.rel.diff.matrix <- rel.diff.matrix^2
+      sum.squared.rel.diff <- rowSums(squared.rel.diff.matrix)
+      RMSD <- sqrt(sum.squared.rel.diff / length(targets.empirical))
+      sim.results.with.design.df$RMSD <- RMSD
+
     } else {
-      sim.results.simple <- model.parallel.run(model = model,
-                                               actual.input.matrix = experiments,
-                                               seed_count = 0,
-                                               n_cores = n_cores)
+      sim.results.with.design.df <- start.experiments
+      sim.results.with.design.df$wave <- 1 # everything that happened previously is now part of wave 1
+      new.sim.results.with.design.df <- dplyr::select(sim.results.with.design.df,
+                                                      -contains("RMSD"))
+      RMSD <- sim.results.with.design.df$RMSD
     }
 
-    new.sim.results.with.design.df <- as.data.frame(cbind(experiments,
-                                                          sim.results.simple,
-                                                          rep(wave, times = nrow(experiments))))
-
-    names(new.sim.results.with.design.df) <- c(x.names, y.names, "seed", "wave")
-
-    new.sim.results.with.design.complete <- stats::complete.cases(new.sim.results.with.design.df)
-    new.sim.results.with.design.df <- dplyr::filter(new.sim.results.with.design.df,
-                                                    new.sim.results.with.design.complete)
-
-    if (wave==1){ # TRUE for the first wave only
-      sim.results.with.design.df <- rbind(sim.results.with.design.df,
-                                          new.sim.results.with.design.df)
-    } else {
-      sim.results.with.design.df <- rbind(dplyr::select(sim.results.with.design.df,
-                                                        -contains("RMSD")),
-                                          new.sim.results.with.design.df)
-    }
-
-    ######## CONTEXT
-    # sim.results.with.design.df contains all simulations from previous waves (sim.results.with.design.df)
-    # and the simulations from the most recent wave (new.sim.results.with.design.df)
-    ########
-
-    # sim.results.with.design.df.median.features <- l1median(dplyr::select(sim.results.with.design.df, contains("y.")))
-    ######## CONTEXT
-    # sim.results.with.design.df.median.features are the median features of ALL experiments for all waves done so far
-    ########
-
-    # 3. Find intermediate features and RMSD.tol for which n.close.to.targets >= min.givetomice
-    # targets.diff <- targets.empirical - sim.results.with.design.df.median.features # experim.median.features # First we determine how far the empirical targets are away from the median features of the executed experiments
-    #candidate.RMSD.tol <- Inf # Initially, we assume that the RMSD cut-off needs to be infinitely large to have sufficient observations to give to mice.
-
-    ### OLD, SLOW APPROACH
-    # # Initiate n.close.to.targets
-    # n.close.to.targets <- 0 # This will be overwritten.
-    # # candidate.intermediate.features <- targets.empirical # We start with the empirical target features
-    # RMSD.tol <- 0 # This will be increased if n.close.to.targets < min.givetomice for this tolerance level
-    #
-    # while (n.close.to.targets < min.givetomice & RMSD.tol <= RMSD.tol.max){
-    #
-    #   diff.matrix <- sweep(x = sim.results.with.design.df[ , ((1 + x.offset):(x.offset + length(targets.empirical)))], MARGIN = 2, targets.empirical)
-    #   rel.diff.matrix <- sweep(diff.matrix, MARGIN = 2, targets.empirical, FUN = "/")
-    #   squared.rel.diff.matrix <- rel.diff.matrix^2
-    #   sum.squared.rel.diff <- rowSums(squared.rel.diff.matrix)
-    #   RMSD <- sqrt(sum.squared.rel.diff / length(targets.empirical))
-    #   n.close.to.targets <- sum(RMSD <= RMSD.tol, na.rm = TRUE)
-    #   #n.close.to.targets.mat[(1+steps.intermediate.targets), (1+steps.RMSD.tol)] <- n.close.to.targets
-    #   #large.enough.training.df <- n.close.to.targets >= min.givetomice
-    #   RMSD.tol <- RMSD.tol + 0.0001  # Increasing RMSD.tol
-    # }
-
-    ### NEW, FAST APPROACH
-    diff.matrix <- sweep(x = sim.results.with.design.df[ , ((1 + x.offset):(x.offset + length(targets.empirical)))],
-                         MARGIN = 2,
-                         targets.empirical)
-    rel.diff.matrix <- sweep(diff.matrix, MARGIN = 2,
-                             targets.empirical, FUN = "/")
-    squared.rel.diff.matrix <- rel.diff.matrix^2
-    sum.squared.rel.diff <- rowSums(squared.rel.diff.matrix)
-    RMSD <- sqrt(sum.squared.rel.diff / length(targets.empirical))
     n.close.to.targets <- min.givetomice
-    ###
-
-
-
-    sim.results.with.design.df$RMSD <- RMSD
     final.intermediate.features <- targets.empirical
 
     # 5. Select n.close.to.targets shortest distances
@@ -224,36 +204,22 @@ MABC <- function(targets.empirical,
     calibration.list$selected.experiments[[wave]] <- sim.results.with.design.df.selected
 
     mice.test <- list()
-    if (max.RMSD <= RMSD.tol.max){
+    if (max.RMSD <= RMSD.tol.max & wave < maxwaves){
       # 7. Put intermediate features in dataframe format
       final.intermediate.features.df <- as.data.frame(matrix(final.intermediate.features, ncol = length(final.intermediate.features)))
       names(final.intermediate.features.df) <- y.names
 
       # 8. Prepare dataframe to give to mice: selected experiments plus intermediate features
-
-      ## DEBUGGING:
-      # We need to replace full_join with smartbind because there are no NAs if there are matching x. values for the added y. values
-
       df.give.to.mice <- gtools::smartbind(dplyr::select(sim.results.with.design.df.selected,
                                                          -one_of(c("RMSD", "seed", "wave"))), # adding target to training dataset
                                            final.intermediate.features.df)
 
-
-      #print(df.give.to.mice)
       if (!identical(strict.positive.params, 0)){
         df.give.to.mice[, strict.positive.params] <- log(df.give.to.mice[, strict.positive.params])
       }
-      # probability.params <- 14
       if (!identical(probability.params, 0)){
         df.give.to.mice[, probability.params] <- log(df.give.to.mice[, probability.params] / (1 - df.give.to.mice[, probability.params])) # logit transformation
       }
-
-      # 9. Override default predictorMatrix with a sparser matrix
-      # Let's think a bit more carefully about which variables should be allowed as input for which input parameters.
-      # IN THE FUTURE THIS COULD BE AUTOMATED WITH VARIABLE SELECTION ALGORITHMS.
-      # predictorMatrix <- (1 - diag(1, ncol(df.give.to.mice))) # This is the default matrix.
-
-      #### NEW: Using LASSO to create predictorMatrix (and ignoring the one that was given as a function argument)
 
       if (is.numeric(predictorMatrix)){
         predictorMatrix.give.to.mice <- predictorMatrix

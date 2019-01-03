@@ -5,7 +5,7 @@
 \title{MICE-assisted Approximate Bayesian Calibration}
 \usage{
 MABC(targets.empirical, model, RMSD.tol.max = 2, min.givetomice = 64,
-  n.experiments = 256, start.experiments = 0, lls, uls,
+  n.experiments = 256, start.experiments = NULL, lls, uls,
   strict.positive.params, probability.params, inside_prior = TRUE,
   method = "norm", predictorMatrix = "complete", maxit = 50,
   maxwaves = 4, n_cores = n_cores, multinode = FALSE)
@@ -25,9 +25,13 @@ to which MICE is applied}
 \item{n.experiments}{Number of parameter combinations in each wave of model
 runs}
 
-\item{start.experiments}{Matrix of experiments (possibly output from a
-previous calibration). Set to 0, start experiments will be drawn uniformly
-from the prior distributions.}
+\item{start.experiments}{If set to NULL (default), start experiments will be
+drawn uniformly from the prior distributions. If a matrix of input
+parameter values, possibly output from a previous calibration, models with
+these inputs will be run, instead of drawing from the prior distributions.
+To resume where a previous calibration ended, you can input
+start.experiments as a data.frame with inputs, outputs, seed, wave and RMSD
+values.}
 
 \item{lls}{Vector of lower limits of the prior distribution of input
 parameter values}
