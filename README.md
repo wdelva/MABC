@@ -29,15 +29,10 @@ available as an executable file for a wide variety of operating systems and
 computer architectures, and a compilable binary is also available should you
 need it.
 
-MaC.weighted.R -- The core function to run MABC.
+MABC.R -- The core function to run MABC.
 
-MaC.R -- An alternative function, probably not formally Bayesian. OK to find
-parameter combinations that produce model output that looks like the target
-features. Not OK if the goal is to estimate a Posterior distribution in a strict
-Bayesian sense.
-
-mice.fit.R, mice.impute.norm.fit.R, sampler.fit.R, sampler.univ.fit.R -- Helper
-functions used by the above two functions.
+mice.parallel, model.mpi.run.R, model.parallelrun.R -- Helper functions used by
+the above two functions.
   
 
 ## SYSTEM AND SOFTWARE REQUIREMENTS
@@ -51,19 +46,17 @@ functions used by the above two functions.
 
   Open MPI or Microsoft MPI Redistributable Package, and Rmpi. For installation instructions, see <http://fisher.stats.uwo.ca/faculty/yu/Rmpi/>.
   
-  R version >= 3.5.0
+  R version >= 3.4.0
   
   In addition, a long list of auxiliary R packages is required to run the
-  functions in this package.
+  functions in this package. All of these dependencies will get installed
+  automatically when installing the software.
   
   install.packages("devtools")
   
-  install.packages("pacman")
-  
   library(devtools)
   
-  p_load(mice, tidyverse, glmnet, gsubfn, mvtnorm, pcaPP, randtoolbox)
- 
+  devtools::install_github(wdelva/MABC) 
 
 ## COPYRIGHT AND LICENSING INFORMATION
 
