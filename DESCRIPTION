@@ -2,7 +2,7 @@ Package: MABC
 Type: Package
 Title: Approximate Bayesian Computation with MICE
 Version: 0.1.0
-Author: Wim Delva
+Author: Wim Delva, Jonathan Dushoff
 Maintainer: Wim Delva <DELVAW@sun.ac.za>
 Description:
   MABC is an R package for calibrating stochastic simulation models to data. It
@@ -12,6 +12,8 @@ Description:
 License: file LICENSE
 Encoding: UTF-8
 LazyData: true
+Remotes:
+    github::stefvanbuuren/mice/pkg
 Imports:
     stats,
     utils,
