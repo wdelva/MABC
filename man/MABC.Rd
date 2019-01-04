@@ -70,8 +70,9 @@ the foreach package. If FALSE and n_cores > 1, model runs are distributed
 over the cores of a single node, using the parallel package.}
 }
 \value{
-A list with multiple waves of proposed input parameter values to
-  match a vector of target features.
+A list with the following components: \item{results}{A list with \code{maxwaves} elements. Each element is itself a list with 6 named elements: \code{thiswave.io}: Input and Output of the simulations of this wave, \code{thiswave.median.features}: The l1 median of this wave's model output, \code{upto.thiswave.median.features}: The l1 median of all model output up to and including this wave, \code{closest.upto.thiswave.median.features}: The l1 median of the \code{min.givetomice} model features that are closest to the target features, up to this wave, \code{max.RMSD}: The largest Root Mean Square Distance of the \code{min.givetomice} model features that are closest to the target features, up to this wave. The \code{max.RMSD} is expected to decrease with increasing waves, \code{closest.upto.thiswave.io}: Input and Output of the \code{min.givetomice} simulations that have features closest to the target features, up to this wave. The input parameters make up the approximate posterior distribution.} \item{targets}{The vector of target
+  features} \item{secondspassed}{The time (in seconds) it took MABC to
+  complete the calibration}
 }
 \description{
 Produces a list with multiple waves of proposed input parameter values to

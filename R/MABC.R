@@ -49,8 +49,9 @@
 #'   over the cores of multiple nodes, using DOsnow and snow as the back-end to
 #'   the foreach package. If FALSE and n_cores > 1, model runs are distributed
 #'   over the cores of a single node, using the parallel package.
-#' @return A list with multiple waves of proposed input parameter values to
-#'   match a vector of target features.
+#' @return A list with the following components: \item{results}{A list with \code{maxwaves} elements. Each element is itself a list with 6 named elements: \code{thiswave.io}: Input and Output of the simulations of this wave, \code{thiswave.median.features}: The l1 median of this wave's model output, \code{upto.thiswave.median.features}: The l1 median of all model output up to and including this wave, \code{closest.upto.thiswave.median.features}: The l1 median of the \code{min.givetomice} model features that are closest to the target features, up to this wave, \code{max.RMSD}: The largest Root Mean Square Distance of the \code{min.givetomice} model features that are closest to the target features, up to this wave. The \code{max.RMSD} is expected to decrease with increasing waves, \code{closest.upto.thiswave.io}: Input and Output of the \code{min.givetomice} simulations that have features closest to the target features, up to this wave. The input parameters make up the approximate posterior distribution.} \item{targets}{The vector of target
+#'   features} \item{secondspassed}{The time (in seconds) it took MABC to
+#'   complete the calibration}
 #'
 #' @import mice
 #' @importFrom gsubfn strapplyc
@@ -188,23 +189,22 @@ MABC <- function(targets.empirical,
     selected.distances <- dist.order[1:n.close.to.targets]
     sim.results.with.design.df.selected <- sim.results.with.design.df[selected.distances, ]
 
-    calibration.list$results[[wave]]$new.sim.results.with.design.df <- new.sim.results.with.design.df
+    calibration.list$results[[wave]]$thiswave.io <- new.sim.results.with.design.df
 
     # 5.aaaa Keeping track of medians
-    calibration.list$results[[wave]]$sim.results.with.design.df.median.features <- pcaPP::l1median(dplyr::select(sim.results.with.design.df, contains("y.")))
-    # The median of the simulations in the lastest wave
-    calibration.list$results[[wave]]$new.sim.results.with.design.df.median.features <- pcaPP::l1median(dplyr::select(new.sim.results.with.design.df, contains("y.")))
+    # The median of the simulations in the latest wave
+    calibration.list$results[[wave]]$thiswave.median.features <- pcaPP::l1median(dplyr::select(new.sim.results.with.design.df, contains("y.")))
+    # The median of all simulations up to and including the latest wave
+    calibration.list$results[[wave]]$upto.thiswave.median.features <- pcaPP::l1median(dplyr::select(sim.results.with.design.df, contains("y.")))
     # The median of the simulations to give to mice
-    calibration.list$results[[wave]]$sim.results.with.design.df.selected.median.features <- pcaPP::l1median(dplyr::select(sim.results.with.design.df.selected, contains("y.")))
+    calibration.list$results[[wave]]$closest.upto.thiswave.median.features <- pcaPP::l1median(dplyr::select(sim.results.with.design.df.selected, contains("y.")))
 
     # 5.b. Record highest RMSD value for that the selected experiments
     max.RMSD <- max(sim.results.with.design.df.selected$RMSD)
     calibration.list$results[[wave]]$max.RMSD <- max.RMSD
-    # 5.c. Record n.close.target
-    calibration.list$results[[wave]]$n.close.to.targets <- n.close.to.targets
 
     # 6. Record selected experiments to give to mice for this wave
-    calibration.list$results[[wave]]$selected.experiments <- sim.results.with.design.df.selected
+    calibration.list$results[[wave]]$closest.upto.thiswave.io <- sim.results.with.design.df.selected
 
     mice.test <- list()
     if (max.RMSD <= RMSD.tol.max & wave < maxwaves){
