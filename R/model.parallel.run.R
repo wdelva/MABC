@@ -23,11 +23,12 @@ model.parallel.run <- function(model,
 
   for (i in 1:nb_simul) {
     param <- c((seed_count + i), actual.input.matrix[i, ])
-    list_param[[i]] <- param
+    list_param[[i]] <- list(param)
   }
   list_simul_summarystat = parLapplyLB(cl = cl,
                                        X = list_param,
-                                       fun = model)
+                                       fun = model,
+                                       index = 1)
   tab_simul_summarystat <- do.call(rbind, list_simul_summarystat)
   parallel::stopCluster(cl)
   return(cbind(tab_simul_summarystat, seed_count + 1:nb_simul))

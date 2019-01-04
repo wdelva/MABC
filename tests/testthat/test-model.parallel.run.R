@@ -1,7 +1,7 @@
 context("Model parallel run")
 
 test_that("model.parallel.run works", {
-  expect_known_output(model.parallel.run(model = helper.sir.par,
+  expect_known_output(model.parallel.run(model = helper.sir,
                                          actual.input.matrix = matrix(c(0.2, 0.02),
                                                                       ncol = 2,
                                                                       nrow = 4,
