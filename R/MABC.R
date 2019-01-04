@@ -81,7 +81,8 @@ MABC <- function(targets.empirical,
                  multinode = FALSE){
   # 0. Start the clock
   ptm <- proc.time()
-  calibration.list <- list() # initiating the list where all the output of MiceABC will be stored
+  # initiating the list where all MABC output will be stored
+  calibration.list <- vector("list", length = maxwaves)
   wave <- 1 # initiating the loop of waves of simulations (one iteration is one wave)
   max.RMSD <- Inf # initially it is infinitely large, but in later iterations it shrinks
   #sim.results.with.design.df <- NULL # Will be growing with each wave (appending)
@@ -185,23 +186,23 @@ MABC <- function(targets.empirical,
     selected.distances <- dist.order[1:n.close.to.targets]
     sim.results.with.design.df.selected <- sim.results.with.design.df[selected.distances, ]
 
-    calibration.list$new.sim.results.with.design.df[[wave]] <- new.sim.results.with.design.df
+    calibration.list[[wave]]$new.sim.results.with.design.df <- new.sim.results.with.design.df
 
     # 5.aaaa Keeping track of medians
-    calibration.list$sim.results.with.design.df.median.features[[wave]] <- pcaPP::l1median(dplyr::select(sim.results.with.design.df, contains("y.")))
+    calibration.list[[wave]]$sim.results.with.design.df.median.features <- pcaPP::l1median(dplyr::select(sim.results.with.design.df, contains("y.")))
     # The median of the simulations in the lastest wave
-    calibration.list$new.sim.results.with.design.df.median.features[[wave]] <- pcaPP::l1median(dplyr::select(new.sim.results.with.design.df, contains("y.")))
+    calibration.list[[wave]]$new.sim.results.with.design.df.median.features <- pcaPP::l1median(dplyr::select(new.sim.results.with.design.df, contains("y.")))
     # The median of the simulations to give to mice
-    calibration.list$sim.results.with.design.df.selected.median.features[[wave]] <- pcaPP::l1median(dplyr::select(sim.results.with.design.df.selected, contains("y.")))
+    calibration.list[[wave]]$sim.results.with.design.df.selected.median.features <- pcaPP::l1median(dplyr::select(sim.results.with.design.df.selected, contains("y.")))
 
     # 5.b. Record highest RMSD value for that the selected experiments
     max.RMSD <- max(sim.results.with.design.df.selected$RMSD)
-    calibration.list$max.RMSD[[wave]] <- max.RMSD
+    calibration.list[[wave]]$max.RMSD <- max.RMSD
     # 5.c. Record n.close.target
-    calibration.list$n.close.to.targets[[wave]] <- n.close.to.targets
+    calibration.list[[wave]]$n.close.to.targets <- n.close.to.targets
 
     # 6. Record selected experiments to give to mice for this wave
-    calibration.list$selected.experiments[[wave]] <- sim.results.with.design.df.selected
+    calibration.list[[wave]]$selected.experiments <- sim.results.with.design.df.selected
 
     mice.test <- list()
     if (max.RMSD <= RMSD.tol.max & wave < maxwaves){
@@ -323,9 +324,6 @@ MABC <- function(targets.empirical,
 
   # 16. Stop clock and return calibration list
   calibration.list$secondspassed <- proc.time() - ptm # Stop the clock
-
-  print(c("time", calibration.list$secondspassed), quote = FALSE)
-
 
   return(calibration.list)
 }
