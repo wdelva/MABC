@@ -51,11 +51,12 @@ parameters.}
 restricted to the initial ranges of the prior distribution during the
 subsequent algorithm steps.}
 
-\item{method}{Method used by MICE. E.g. "norm" or "rf"}
+\item{method}{Method used by MICE. Currently, only "norm" is supported.}
 
-\item{predictorMatrix}{Can be "complete", "LASSO", or a user-defined matrix
-of indices that indicate which variables are included in the chained
-equations in MICE}
+\item{predictorMatrix}{As in mice::mice. Can be "complete", "LASSO" (Least
+Absolute Shrinkage and Selection Operator), or a user-defined matrix of
+zeros and ones. Diagonal must always be zeros. Ones indicate which
+variables are included in the chained equations in MICE.}
 
 \item{maxit}{The maxit argument used in MICE (number of times that the
 chained equations are cycled through)}
