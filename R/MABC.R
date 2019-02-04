@@ -265,7 +265,7 @@ MABC <- function(targets.empirical,
                                           maxit = maxit,
                                           printFlag = FALSE,
                                           n_cores = 1,
-                                          n_experiments = 2 * n.experiments),
+                                          n_experiments = 10 * n.experiments),
                             error = function(mice.err) {
                               return(list())
                             })
