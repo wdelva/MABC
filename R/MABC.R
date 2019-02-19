@@ -300,23 +300,28 @@ MABC <- function(targets.empirical,
         within.prior.limits <- params.above.lls %in% length(lls) & params.below.uls %in% length(uls)
         experiments.df <- experiments.df[within.prior.limits, ]
       }
-      set.seed(0) # for reproducibility
 
-      # NEW:
-      mu.experiments <- colMeans(experiments.df)
-      cov.experiments <- stats::cov(experiments.df)
-      densities.experiments <- mvtnorm::dmvnorm(experiments.df, mu.experiments, cov.experiments)
-      weights.experiments <- 1/densities.experiments
-      #
+      if (nrow(experiments.df) < n.experiments){
+        wave <- maxwaves + 1
+      } else {
+        set.seed(0) # for reproducibility
 
-      experiments <- matrix(unlist(dplyr::sample_n(experiments.df,
-                                                   size = n.experiments,
-                                                   replace = TRUE,
-                                                   weight = weights.experiments)),
-                            byrow = FALSE,
-                            ncol = length(x.names))
+        # NEW:
+        mu.experiments <- colMeans(experiments.df)
+        cov.experiments <- stats::cov(experiments.df)
+        densities.experiments <- mvtnorm::dmvnorm(experiments.df, mu.experiments, cov.experiments)
+        weights.experiments <- 1/densities.experiments
+        #
 
-      wave <- wave + 1
+        experiments <- matrix(unlist(dplyr::sample_n(experiments.df,
+                                                     size = n.experiments,
+                                                     replace = TRUE,
+                                                     weight = weights.experiments)),
+                              byrow = FALSE,
+                              ncol = length(x.names))
+
+        wave <- wave + 1
+      }
     } else {
       wave <- maxwaves + 1
     }
