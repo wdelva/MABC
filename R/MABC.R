@@ -250,6 +250,14 @@ MABC <- function(targets.empirical,
           col.indices <- all.names %in% nonzero.names
           predictorMatrix.LASSO[y.index, col.indices] <- 1
         }
+
+        # We will now replace the "all zero" rows in predictorMatrix.LASSO with rows of the "complete" predictorMatrix
+        # Finding out which rows are all zero
+        all.zero.rows <- rowSums(predictorMatrix.LASSO) == 0
+        # Creating complete predictorMatrix
+        predictorMatrix.complete <- (1 - diag(1, ncol(df.give.to.mice)))
+        # Doing the appropriate replacements
+        predictorMatrix.LASSO[all.zero.rows, ] <- predictorMatrix.complete[all.zero.rows, ]
         predictorMatrix.give.to.mice <- predictorMatrix.LASSO
       }
 
