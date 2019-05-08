@@ -71,4 +71,4 @@ Work must be released under the same terms.
 Please contact Prof Wim Delva with questions regarding the files provided and
 their authorized usage:
 
-Wim Delva Email: <DELVAW@sun.ac.za>
+Wim Delva Email: <wimdelva@gmail.com>
